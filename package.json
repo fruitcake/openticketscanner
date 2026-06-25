@@ -1,0 +1,35 @@
+{
+  "name": "openticketscanner",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "expo": "~56.0.12",
+    "expo-camera": "~56.0.8",
+    "expo-constants": "~56.0.18",
+    "expo-linking": "~56.0.14",
+    "expo-router": "~56.2.11",
+    "expo-sqlite": "~56.0.5",
+    "expo-status-bar": "~56.0.4",
+    "expo-system-ui": "~56.0.5",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-gesture-handler": "~2.31.1",
+    "react-native-mmkv": "^4.3.2",
+    "react-native-nitro-modules": "^0.35.10",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.2",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "test": "node --test \"src/**/*.test.ts\""
+  },
+  "private": true
+}
