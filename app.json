@@ -9,14 +9,14 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.openticketscanner.app",
+      "bundleIdentifier": "nl.fruitcake.openticketscanner",
       "associatedDomains": ["applinks:app.openticketscanner.com"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.openticketscanner.app",
+      "package": "nl.fruitcake.openticketscanner",
       "intentFilters": [
         {
           "action": "VIEW",

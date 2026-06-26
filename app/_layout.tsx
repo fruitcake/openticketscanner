@@ -16,12 +16,12 @@ export default function RootLayout() {
             headerTintColor: colors.text,
             headerTitleStyle: { fontWeight: '700' },
             contentStyle: { backgroundColor: colors.bg },
+            // Back button shows only the chevron — no "previous title" label.
+            headerBackButtonDisplayMode: 'minimal',
+            headerBackTitle: '',
           }}
         >
-          <Stack.Screen
-            name="index"
-            options={{ title: '🏠', headerTitle: 'Open Ticket Scanner' }}
-          />
+          <Stack.Screen name="index" options={{ title: 'Open Ticket Scanner' }} />
           <Stack.Screen name="scan" options={{ title: 'Scan Mode' }} />
           <Stack.Screen name="history" options={{ title: 'Scan History' }} />
           <Stack.Screen name="settings" options={{ title: 'Settings' }} />
