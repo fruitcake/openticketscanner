@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open Ticket Scanner — Scan &amp; validate tickets against your own API</title>
+    <meta name="description" content="A free, open-source QR &amp; barcode ticket scanner for iOS and Android. Validate event tickets against your own API with instant green / yellow / red results." />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Open Ticket Scanner" />
+    <meta property="og:description" content="Scan &amp; validate event tickets against your own API. Open source, iOS &amp; Android." />
+    <meta property="og:image" content="https://fruitcake.github.io/openticketscanner/img/og.png" />
+    <meta property="og:url" content="https://fruitcake.github.io/openticketscanner/" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <!-- nav -->
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="./">
+          <img src="img/icon.png" alt="" />
+          <span>Open Ticket Scanner</span>
+        </a>
+        <span class="spacer"></span>
+        <a class="navlink" href="#features">Features</a>
+        <a class="navlink" href="privacy.html">Privacy</a>
+        <a class="navlink" href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+      </div>
+    </header>
+
+    <!-- hero -->
+    <section class="hero">
+      <div class="wrap">
+        <img class="appicon" src="img/icon.png" alt="Open Ticket Scanner app icon" />
+        <h1>Validate tickets in a tap</h1>
+        <p class="tag">
+          A free, open-source QR &amp; barcode scanner that checks every ticket
+          against <strong>your own API</strong> — with instant
+          <span class="dot g"></span> green,
+          <span class="dot y"></span> yellow and
+          <span class="dot r"></span> red results.
+        </p>
+        <div class="cta">
+          <a class="btn" href="https://github.com/fruitcake/openticketscanner">View on GitHub</a>
+          <a class="btn ghost" href="#features">See features</a>
+        </div>
+        <p class="badge-note">iOS &amp; Android · App Store and Google Play links coming soon.</p>
+      </div>
+    </section>
+
+    <!-- screenshots -->
+    <div class="shots" aria-label="App screenshots">
+      <img src="img/shot-validate.png"   alt="A valid ticket showing a green result" />
+      <img src="img/shot-duplicates.png" alt="A duplicate ticket showing a yellow already-used result" />
+      <img src="img/shot-configure.png"  alt="Configuration screen connecting to your own API" />
+      <img src="img/shot-provision.png"  alt="Provision devices with a setup QR code" />
+      <img src="img/shot-history.png"    alt="On-device scan history" />
+    </div>
+
+    <!-- features -->
+    <section id="features">
+      <div class="wrap">
+        <h2>Built for the door</h2>
+        <p class="sub">Everything you need to check people in quickly — and nothing you don't.</p>
+        <div class="features">
+          <div class="feature">
+            <div class="ic">✅</div>
+            <h3>Instant verdicts</h3>
+            <p>Every scan returns a clear green / yellow / red result with the ticket
+              details and a message from your server, plus haptic and sound feedback.</p>
+          </div>
+          <div class="feature">
+            <div class="ic">🔌</div>
+            <h3>Bring your own backend</h3>
+            <p>Point a configuration at any HTTPS endpoint. Each scan is POSTed to your
+              API and the response drives the result — your rules, your data.</p>
+          </div>
+          <div class="feature">
+            <div class="ic">📷</div>
+            <h3>Fast, reliable scanning</h3>
+            <p>QR, Code 128, EAN, PDF417 and more, with continuous mode, a torch toggle,
+              debounce against double-scans, and manual entry as a fallback.</p>
+          </div>
+          <div class="feature">
+            <div class="ic">🔗</div>
+            <h3>One-scan provisioning</h3>
+            <p>Set up one device, then share a QR or link to copy the configuration onto
+              every other scanner — with an optional, clearly-flagged API key.</p>
+          </div>
+          <div class="feature">
+            <div class="ic">🗂️</div>
+            <h3>Local history</h3>
+            <p>Each scanner keeps its own on-device history so you can review check-ins
+              and spot duplicates, even after the result popup is gone.</p>
+          </div>
+          <div class="feature">
+            <div class="ic">🔒</div>
+            <h3>Privacy by design</h3>
+            <p>No accounts, no analytics, no tracking. Scan data only ever goes to the
+              server <em>you</em> configure. <a href="privacy.html">Read the policy →</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- open source -->
+    <section class="band">
+      <div class="wrap">
+        <h2>Free &amp; open source</h2>
+        <p class="sub">Audit it, self-host the validation API, or fork it for your event.
+          Adapting it to a new ticket backend is a single file.</p>
+        <div class="cta">
+          <a class="btn" href="https://github.com/fruitcake/openticketscanner">Star on GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- footer -->
+    <footer>
+      <div class="wrap">
+        <div>© <span id="yr">2026</span> <a href="https://fruitcake.nl">Fruitcake</a>. MIT licensed.</div>
+        <div class="links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+          <a href="mailto:barry@fruitcake.nl">Contact</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('yr').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>

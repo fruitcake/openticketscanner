@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — Open Ticket Scanner</title>
+    <meta name="description" content="Privacy policy for the Open Ticket Scanner mobile app." />
+    <meta name="robots" content="index, follow" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="./">
+          <img src="img/icon.png" alt="" />
+          <span>Open Ticket Scanner</span>
+        </a>
+        <span class="spacer"></span>
+        <a class="navlink" href="./">Home</a>
+        <a class="navlink" href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+      </div>
+    </header>
+
+    <main class="doc">
+      <a class="back" href="./">← Back to home</a>
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: 26 June 2026</p>
+
+      <div class="tldr">
+        <strong>In short:</strong> Open Ticket Scanner does not collect, sell, or
+        share your personal data. It has no accounts, no analytics, and no
+        third-party tracking. Everything you enter stays on your device, except the
+        scan requests the app sends to the ticket-validation server <em>you</em>
+        configure.
+      </div>
+
+      <p>
+        This policy explains how the <strong>Open Ticket Scanner</strong> mobile app
+        (the &ldquo;App&rdquo;) handles information. The App is published by
+        <strong>Fruitcake</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;) and is free
+        and open source. If you operate the App to check tickets at an event, note
+        that the validation server you point it at is yours — see
+        <a href="#operator">Operators &amp; your server</a> below.
+      </p>
+
+      <h2 id="collect">What the App stores</h2>
+      <p>
+        The App stores the following <strong>locally on your device only</strong>.
+        We never receive it.
+      </p>
+      <table>
+        <thead><tr><th>Data</th><th>Why</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Scanner configurations — name, API URL, optional API key, scanner
+              name, and scan settings</td>
+            <td>So the App knows which server to validate against and how to behave</td>
+            <td>On-device key–value storage</td>
+          </tr>
+          <tr>
+            <td>Scan history — the scanned code, result status, and timestamp</td>
+            <td>So you can review check-ins and spot duplicates</td>
+            <td>On-device database</td>
+          </tr>
+          <tr>
+            <td>A randomly generated device identifier</td>
+            <td>To identify this particular scanner to your server</td>
+            <td>On-device storage</td>
+          </tr>
+          <tr>
+            <td>App preferences — haptic and sound feedback toggles</td>
+            <td>To remember your settings</td>
+            <td>On-device storage</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        This data stays on the device. It is removed when you delete the relevant
+        configuration, clear the history in the App, or uninstall the App.
+      </p>
+
+      <h2 id="camera">Camera</h2>
+      <p>
+        The App uses your device camera <strong>only</strong> to scan QR codes and
+        barcodes in real time. Camera frames are processed on the device to read the
+        code and are <strong>not stored, recorded, or transmitted</strong> by the App.
+        You grant camera access through your operating system's standard permission
+        prompt and can revoke it at any time in your device settings.
+      </p>
+
+      <h2 id="network">What gets sent over the network</h2>
+      <p>
+        When you scan a ticket in a ticket-validation configuration, the App sends a
+        request to the API URL <strong>you</strong> entered for that configuration.
+        That request contains:
+      </p>
+      <ul>
+        <li>the scanned code value and its barcode type;</li>
+        <li>the configuration's identifier and the scanner name you set;</li>
+        <li>the device identifier described above;</li>
+        <li>the time of the scan; and</li>
+        <li>the App version (sent as a request header).</li>
+      </ul>
+      <p>
+        These requests go <strong>only</strong> to the server you configure — not to
+        us. If you add an API key to a configuration, it is sent with these requests
+        to authenticate to your server. The App contains no advertising or analytics
+        SDKs and makes no other background network connections of its own.
+      </p>
+
+      <h2 id="operator">Operators &amp; your server</h2>
+      <p>
+        Open Ticket Scanner is a tool for connecting to a ticketing backend that you
+        choose or run. <strong>The server that receives the scan requests is operated
+        by you or your ticketing provider, not by us.</strong> What that server logs,
+        stores, or does with the data — including any personal data associated with a
+        ticket — is governed by <em>your</em> own privacy practices and agreements
+        with your attendees, not by this policy. If you deploy the App for an event,
+        you are responsible for handling attendee data lawfully.
+      </p>
+
+      <h2 id="permissions">Permissions the App requests</h2>
+      <ul>
+        <li><strong>Camera</strong> — to scan codes (required for scanning).</li>
+        <li><strong>Internet</strong> — to send scan requests to your configured server.</li>
+        <li><strong>Vibration / audio</strong> — for optional haptic and sound feedback on a result.</li>
+      </ul>
+
+      <h2 id="children">Children</h2>
+      <p>
+        The App is a utility intended for event staff and is not directed at children.
+        We do not knowingly collect any information from children.
+      </p>
+
+      <h2 id="retention">Keeping &amp; deleting your data</h2>
+      <p>
+        Because the App stores data only on your device, you are in control of it. You
+        can clear a configuration's scan history from within the App, delete a
+        configuration, or uninstall the App to remove all locally stored data. To
+        remove data held by a validation server, contact whoever operates that server.
+      </p>
+
+      <h2 id="changes">Changes to this policy</h2>
+      <p>
+        We may update this policy as the App evolves. Material changes will be
+        reflected here with a new &ldquo;Last updated&rdquo; date. Because the App is
+        open source, the history of this document is also available in the project
+        repository.
+      </p>
+
+      <h2 id="contact">Contact</h2>
+      <p>
+        Questions about this policy? Email
+        <a href="mailto:barry@fruitcake.nl">barry@fruitcake.nl</a> or open an issue on
+        <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>.
+      </p>
+
+      <p style="margin-top:40px"><a class="back" href="./">← Back to home</a></p>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>© <span id="yr">2026</span> <a href="https://fruitcake.nl">Fruitcake</a>. MIT licensed.</div>
+        <div class="links">
+          <a href="./">Home</a>
+          <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+          <a href="mailto:barry@fruitcake.nl">Contact</a>
+        </div>
+      </div>
+    </footer>
+    <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  </body>
+</html>
