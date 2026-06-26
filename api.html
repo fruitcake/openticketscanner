@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Server API contract — Open Ticket Scanner</title>
+    <meta name="description" content="How to build a validation endpoint for Open Ticket Scanner: the request the app sends, the JSON response it expects, and example servers." />
+    <link rel="canonical" href="https://openticketscanner.com/api.html" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .doc pre {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+        padding: 16px 18px; overflow: auto; font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+        font-size: 13px; line-height: 1.55; color: #dbe4ee;
+      }
+      .doc code {
+        font-family: 'SF Mono', ui-monospace, Menlo, monospace; background: var(--surface-2);
+        padding: 1px 6px; border-radius: 6px; font-size: .9em; color: #e6edf3;
+      }
+      .doc pre code { background: none; padding: 0; font-size: 13px; }
+      .method { display: inline-block; font-weight: 700; background: var(--green); color: #fff; padding: 3px 11px; border-radius: 7px; font-size: 13px; letter-spacing: .03em; }
+      .endpoint { font-family: 'SF Mono', ui-monospace, Menlo, monospace; color: var(--muted); }
+      .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
+      .dot.g { background: var(--green); } .dot.y { background: var(--yellow); } .dot.r { background: var(--red); } .dot.e { background: var(--muted); }
+      .doc h2 { scroll-margin-top: 84px; }
+      .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; }
+      .toc ul { margin: 6px 0 0; padding-left: 20px; columns: 2; }
+      .toc a { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="./"><img src="img/icon.png" alt="" /><span>Open Ticket Scanner</span></a>
+        <span class="spacer"></span>
+        <a class="navlink" href="./">Home</a>
+        <a class="navlink" href="setup.html">Set up</a>
+        <a class="navlink" href="api.html">API</a>
+        <a class="navlink" href="privacy.html">Privacy</a>
+        <a class="navlink" href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+      </div>
+    </header>
+
+    <main class="doc">
+      <a class="back" href="./">← Back to home</a>
+      <h1>Server API contract</h1>
+      <p class="updated">How to build a validation endpoint the app can talk to.</p>
+
+      <div class="tldr">
+        <strong>The deal:</strong> for every scan, the app sends a <code>POST</code> with JSON to the
+        API URL you configure. Your server replies with a small JSON object saying whether the ticket is
+        <span class="dot g"></span>valid, <span class="dot y"></span>already&nbsp;used, or
+        <span class="dot r"></span>invalid — plus an optional message and ticket details. That's it.
+      </div>
+
+      <div class="toc">
+        <strong>On this page</strong>
+        <ul>
+          <li><a href="#request">The request</a></li>
+          <li><a href="#response">The response</a></li>
+          <li><a href="#status">Status mapping</a></li>
+          <li><a href="#examples">Examples</a></li>
+          <li><a href="#auth">Authentication</a></li>
+          <li><a href="#server">Example server</a></li>
+          <li><a href="#custom">Custom response shapes</a></li>
+          <li><a href="#notes">Notes &amp; limits</a></li>
+        </ul>
+      </div>
+
+      <h2 id="request">The request</h2>
+      <p><span class="method">POST</span> &nbsp;<span class="endpoint">&lt;your configured API URL&gt;</span></p>
+
+      <h3>Headers</h3>
+      <table>
+        <thead><tr><th>Header</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><code>Content-Type</code></td><td><code>application/json</code></td></tr>
+          <tr><td><code>Accept</code></td><td><code>application/json</code></td></tr>
+          <tr><td><code>X-App-Version</code></td><td>App version, e.g. <code>1.0.0</code></td></tr>
+          <tr><td><code>Authorization</code></td><td><code>Bearer &lt;api key&gt;</code> — only if a key is set</td></tr>
+          <tr><td><code>X-API-Key</code></td><td><code>&lt;api key&gt;</code> — same key, sent both ways for convenience</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Body</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>code</code></td><td>string</td><td>The scanned barcode/QR value.</td></tr>
+          <tr><td><code>type</code></td><td>string</td><td>Barcode format, e.g. <code>qr</code>, <code>code128</code>, <code>ean13</code>.</td></tr>
+          <tr><td><code>configId</code></td><td>string</td><td>Identifier of the scanner configuration in use.</td></tr>
+          <tr><td><code>scannerName</code></td><td>string?</td><td>Optional lane/scanner label. Omitted if not set.</td></tr>
+          <tr><td><code>deviceId</code></td><td>string</td><td>Stable, random per-install device identifier.</td></tr>
+          <tr><td><code>scannedAt</code></td><td>string</td><td>ISO&nbsp;8601 timestamp of the scan.</td></tr>
+        </tbody>
+      </table>
+      <pre><code>POST /validate HTTP/1.1
+Host: api.myevent.com
+Content-Type: application/json
+Accept: application/json
+X-App-Version: 1.0.0
+Authorization: Bearer sk_live_…
+X-API-Key: sk_live_…
+
+{
+  "code": "TKT-4F9A21",
+  "type": "qr",
+  "configId": "cfg_8a1c",
+  "scannerName": "Entrance #1",
+  "deviceId": "a1b2c3d4-e5f6a7b8",
+  "scannedAt": "2026-06-26T18:14:58.204Z"
+}</code></pre>
+
+      <h2 id="response">The response</h2>
+      <p>Reply with a JSON <strong>object</strong>. The app reads three things from it:</p>
+      <ul>
+        <li><code>status</code> — the outcome (string). Also accepts <code>result</code> or <code>state</code>,
+          or a boolean <code>valid: true/false</code>.</li>
+        <li><code>message</code> — a human-readable line shown in the popup. Also accepts
+          <code>reason</code>, <code>detail</code>, or <code>title</code>. Optional — a sensible default
+          is used per status.</li>
+        <li><code>ticket</code> — an object of <em>key → value</em> pairs rendered as rows (holder name,
+          type, gate, seat…). Also accepts <code>holder</code> or <code>data</code>. Nested objects are
+          skipped; everything else is shown as text. Optional.</li>
+      </ul>
+      <pre><code>200 OK
+{
+  "status": "valid",
+  "message": "Welcome — VIP entry",
+  "ticket": { "name": "Ada Lovelace", "type": "VIP", "gate": "A", "seat": "12" }
+}</code></pre>
+
+      <h2 id="status">Status mapping</h2>
+      <p>The app maps your <code>status</code> string to a traffic-light result. Matching is
+        case-insensitive.</p>
+      <table>
+        <thead><tr><th>Result</th><th>Accepted values</th><th>Boolean</th></tr></thead>
+        <tbody>
+          <tr><td><span class="dot g"></span>Green — valid</td><td><code>valid</code>, <code>ok</code>, <code>success</code></td><td><code>valid: true</code></td></tr>
+          <tr><td><span class="dot y"></span>Yellow — already used</td><td><code>used</code>, <code>already_scanned</code>, <code>duplicate</code>, <code>warning</code></td><td>—</td></tr>
+          <tr><td><span class="dot r"></span>Red — rejected</td><td><code>invalid</code>, <code>denied</code>, <code>not_found</code>, <code>expired</code></td><td><code>valid: false</code></td></tr>
+          <tr><td><span class="dot e"></span>Error</td><td>anything unrecognized, a non-JSON body, or HTTP&nbsp;≥&nbsp;500</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p>Return HTTP <code>200</code> for the normal valid / used / invalid outcomes — these are business
+        results, not transport errors. Any response below <code>500</code> is parsed for its JSON body;
+        <code>500+</code> always shows the error popup regardless of body.</p>
+
+      <h2 id="examples">Examples</h2>
+      <h3><span class="dot g"></span>Valid → green</h3>
+      <pre><code>{ "status": "valid", "message": "Welcome — VIP entry",
+  "ticket": { "name": "Ada Lovelace", "type": "VIP", "gate": "A" } }</code></pre>
+      <h3><span class="dot y"></span>Already used → yellow</h3>
+      <pre><code>{ "status": "used", "message": "Ticket already scanned",
+  "ticket": { "name": "Alan Turing", "firstScan": "2026-06-26T19:42:10Z" } }</code></pre>
+      <h3><span class="dot r"></span>Invalid → red</h3>
+      <pre><code>{ "status": "invalid", "message": "Unknown ticket" }</code></pre>
+      <h3>Minimal boolean form</h3>
+      <pre><code>{ "valid": true, "message": "OK" }</code></pre>
+
+      <h2 id="auth">Authentication</h2>
+      <p>If the configuration includes an API key, it arrives on <strong>every</strong> request as both an
+        <code>Authorization: Bearer &lt;key&gt;</code> header and an <code>X-API-Key: &lt;key&gt;</code>
+        header — read whichever you prefer. Reject unauthenticated requests however you like; returning a
+        red/error JSON body (or a <code>401</code>) both surface clearly to the operator. Keys are
+        provisioned per configuration, so you can issue a different key per event or per door.</p>
+
+      <h2 id="server">Example server</h2>
+      <p>A complete validation endpoint in Node.js / Express:</p>
+      <pre><code>import express from 'express';
+const app = express();
+app.use(express.json());
+
+app.post('/validate', (req, res) =&gt; {
+  // --- auth ---
+  const key = req.get('X-API-Key')
+    || (req.get('Authorization') || '').replace(/^Bearer /, '');
+  if (key !== process.env.SCANNER_KEY) {
+    return res.status(401).json({ status: 'invalid', message: 'Bad API key' });
+  }
+
+  // --- look up the ticket ---
+  const { code, scannedAt, scannerName } = req.body;
+  const ticket = db.find(code);                 // your lookup
+  if (!ticket) {
+    return res.json({ status: 'invalid', message: 'Unknown ticket' });
+  }
+  if (ticket.usedAt) {
+    return res.json({
+      status: 'used',
+      message: 'Already scanned',
+      ticket: { name: ticket.name, type: ticket.type, firstScan: ticket.usedAt },
+    });
+  }
+
+  // --- mark used + accept ---
+  db.markUsed(code, { at: scannedAt, by: scannerName });
+  res.json({
+    status: 'valid',
+    message: 'Welcome!',
+    ticket: { name: ticket.name, type: ticket.type, gate: ticket.gate },
+  });
+});
+
+app.listen(3000);</code></pre>
+      <p>Whether a code counts as <em>valid</em> or <em>used</em> is entirely your server's call —
+        typically by recording the first scan and treating repeats as duplicates.</p>
+
+      <h2 id="custom">Already have an API with a different shape?</h2>
+      <p>You don't have to match this contract exactly. All response handling lives in a single adapter file
+        — <code>src/tickets/parseTicketResponse.ts</code> — which is the only place coupled to your JSON.
+        Edit <code>STATUS_MAP</code>, <code>pickStatus</code>, <code>pickMessage</code>, and
+        <code>pickTicketFields</code> to read your fields, and the rest of the app is unaffected.
+        See it on <a href="https://github.com/fruitcake/openticketscanner/blob/main/src/tickets/parseTicketResponse.ts">GitHub</a>.</p>
+
+      <h2 id="notes">Notes &amp; limits</h2>
+      <ul>
+        <li><strong>HTTPS</strong> is strongly recommended — the API key and scan data travel in the request.</li>
+        <li><strong>Timeout:</strong> the app waits up to <strong>10&nbsp;seconds</strong> for a reply, then
+          shows an error. Keep validation fast.</li>
+        <li><strong>No CORS needed</strong> — requests come from a native app, not a browser.</li>
+        <li><strong>Transport failures</strong> (no network, DNS, TLS, timeout) show an error popup; your
+          server is never reached, so there's nothing to return.</li>
+        <li><strong><code>deviceId</code></strong> is stable per install and resets on reinstall — handy for
+          attributing scans to a specific device, but don't treat it as a security credential.</li>
+        <li><strong>Online only:</strong> there is no offline queue today; each scan needs a live response.</li>
+      </ul>
+
+      <p style="margin-top:40px"><a class="back" href="setup.html">→ Generate a setup code</a> once your endpoint is live.</p>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>© <span id="yr">2026</span> <a href="https://fruitcake.nl">Fruitcake</a>. MIT licensed.</div>
+        <div class="links">
+          <a href="./">Home</a>
+          <a href="setup.html">Set up</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+        </div>
+      </div>
+    </footer>
+    <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  </body>
+</html>

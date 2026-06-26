@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Generate a setup code — Open Ticket Scanner</title>
+    <meta name="description" content="Build a scanner configuration in your browser and load it onto a device by scanning a QR code — no typing on the phone." />
+    <link rel="canonical" href="https://openticketscanner.com/setup.html" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .builder { display: grid; gap: 28px; padding: 40px 24px 80px; grid-template-columns: 1fr; align-items: start; }
+      @media (min-width: 900px) { .builder { grid-template-columns: 1.1fr 0.9fr; } .out { position: sticky; top: 88px; } }
+      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+      .form h1 { font-size: 26px; margin: 0 0 4px; }
+      .form .lede { color: var(--muted); margin: 0 0 22px; font-size: 15px; }
+      .field { margin-bottom: 18px; }
+      .field label { display: block; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+      .field .hint { font-weight: 400; color: var(--muted); }
+      input[type=text], input[type=url], input[type=password], input[type=number] {
+        width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); padding: 12px 14px; font-size: 15px; font-family: inherit;
+      }
+      input.mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 14px; }
+      input:focus { outline: none; border-color: var(--primary); }
+      input.bad { border-color: var(--red); }
+      .row { display: flex; gap: 14px; flex-wrap: wrap; }
+      .row .field { flex: 1; min-width: 160px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+      .chip { position: relative; }
+      .chip input { position: absolute; opacity: 0; pointer-events: none; }
+      .chip span {
+        display: inline-block; padding: 8px 14px; border-radius: 20px; font-size: 14px; font-weight: 600;
+        background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); cursor: pointer; user-select: none;
+      }
+      .chip input:checked + span { background: var(--primary); color: #fff; border-color: var(--primary); }
+      .chip input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+      .toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+      .toggle input { width: 18px; height: 18px; accent-color: var(--primary); }
+      .warn {
+        display: none; margin-top: 10px; font-size: 13px; color: #f4c84b;
+        background: rgba(217,163,0,.12); border: 1px solid rgba(217,163,0,.3); border-radius: 10px; padding: 10px 12px;
+      }
+      .warn.show { display: block; }
+      /* output */
+      .out h2 { font-size: 18px; margin: 0 0 16px; }
+      .qrcard { background: #fff; border-radius: 16px; padding: 18px; width: 260px; max-width: 100%; margin: 0 auto 18px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+      .qrcard svg { width: 100%; height: 100%; display: block; }
+      .qrcard.empty { aspect-ratio: 1; background: var(--surface-2); border: 1px dashed var(--border); color: var(--muted); font-size: 14px; text-align: center; padding: 24px; }
+      .linkbox {
+        width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+        color: var(--muted); padding: 12px 14px; font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+        font-size: 12px; word-break: break-all; min-height: 64px; white-space: pre-wrap;
+      }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+      .actions .btn { flex: 1; justify-content: center; min-width: 120px; }
+      .note { color: var(--muted); font-size: 13px; margin-top: 16px; line-height: 1.5; }
+      .err { color: var(--red); font-size: 14px; margin-top: 8px; }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="./"><img src="img/icon.png" alt="" /><span>Open Ticket Scanner</span></a>
+        <span class="spacer"></span>
+        <a class="navlink" href="./">Home</a>
+        <a class="navlink" href="api.html">API</a>
+        <a class="navlink" href="privacy.html">Privacy</a>
+        <a class="navlink" href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+      </div>
+    </header>
+
+    <main class="wrap builder">
+      <!-- form -->
+      <form class="panel form" id="form" autocomplete="off">
+        <h1>Generate a setup code</h1>
+        <p class="lede">Fill this in on your computer, then open <strong>Open Ticket Scanner</strong> →
+          <em>Scan setup code</em> and point it at the QR. No typing on the phone.</p>
+
+        <div class="field">
+          <label for="name">Configuration name</label>
+          <input type="text" id="name" placeholder="Main gate" />
+        </div>
+
+        <div class="field">
+          <label for="endpoint">API URL <span class="hint">— where each scan is sent (required)</span></label>
+          <input type="url" id="endpoint" class="mono" inputmode="url" placeholder="https://api.myevent.com/validate" />
+          <div class="err" id="endpoint-err" hidden>Enter a valid http(s) URL.</div>
+        </div>
+
+        <div class="field">
+          <label for="key">API key <span class="hint">— optional, sent to authenticate</span></label>
+          <input type="text" id="key" class="mono" placeholder="(none)" />
+          <label class="toggle" style="margin-top:10px">
+            <input type="checkbox" id="includeKey" checked />
+            <span>Include the API key in the code</span>
+          </label>
+          <div class="warn" id="keywarn">⚠ The QR/link will contain your API key in plain text. Treat it like a password — only share it with trusted devices.</div>
+        </div>
+
+        <div class="field">
+          <label for="scanner">Scanner name <span class="hint">— optional, identifies this lane</span></label>
+          <input type="text" id="scanner" placeholder="Entrance #1" />
+        </div>
+
+        <div class="field">
+          <label>Code formats</label>
+          <div class="chips" id="formats"></div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Scanning mode</label>
+            <label class="toggle"><input type="checkbox" id="continuous" /><span>Continuous (hands-free)</span></label>
+          </div>
+          <div class="field">
+            <label for="debounce">Debounce <span class="hint">(ms)</span></label>
+            <input type="number" id="debounce" min="0" step="100" value="3000" />
+          </div>
+        </div>
+      </form>
+
+      <!-- output -->
+      <aside class="panel out">
+        <h2>Scan this with the app</h2>
+        <div class="qrcard empty" id="qrcard">Fill in a valid API URL to generate a setup code.</div>
+        <div class="linkbox" id="linkbox" aria-live="polite"></div>
+        <div class="actions">
+          <button type="button" class="btn" id="copy">Copy link</button>
+          <a class="btn ghost" id="openapp" href="#" hidden>Open in app</a>
+          <button type="button" class="btn ghost" id="download" hidden>Download PNG</button>
+        </div>
+        <p class="note">Everything is generated in your browser — nothing is uploaded.
+          The QR encodes a link to <code>app.openticketscanner.com/configure</code>; scanning it
+          (or opening the link on the phone) adds the configuration after a confirmation screen.</p>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>© <span id="yr">2026</span> <a href="https://fruitcake.nl">Fruitcake</a>. MIT licensed.</div>
+        <div class="links">
+          <a href="./">Home</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="vendor/qrcode.min.js"></script>
+    <script>
+      document.getElementById('yr').textContent = new Date().getFullYear();
+
+      // ---- payload format — mirrors src/tickets/configLink.ts ----
+      var HOST = 'app.openticketscanner.com', PATH = 'configure', SCHEME = 'openticketscanner';
+      var VERSION = 1, DEFAULT_DEBOUNCE = 3000;
+      var FORMAT_LABELS = {
+        qr: 'QR Code', ean13: 'EAN-13', ean8: 'EAN-8', code128: 'Code 128', code39: 'Code 39',
+        code93: 'Code 93', codabar: 'Codabar', itf14: 'ITF-14', upc_a: 'UPC-A', upc_e: 'UPC-E',
+        pdf417: 'PDF417', aztec: 'Aztec', datamatrix: 'Data Matrix'
+      };
+      var FORMATS = Object.keys(FORMAT_LABELS);
+
+      function buildLink(cfg, includeKey, base) {
+        var params = [
+          ['v', String(VERSION)],
+          ['name', cfg.name],
+          ['endpoint', cfg.apiUrl],
+          ['formats', cfg.formats.join(',')],
+          ['continuous', cfg.continuousMode ? '1' : '0'],
+          ['debounce', String(cfg.debounceMs)]
+        ];
+        if (cfg.scannerName) params.push(['scanner', cfg.scannerName]);
+        if (includeKey && cfg.apiKey) params.push(['key', cfg.apiKey]);
+        var query = params.map(function (p) { return p[0] + '=' + encodeURIComponent(p[1]); }).join('&');
+        var prefix = base === 'scheme' ? (SCHEME + '://' + PATH) : ('https://' + HOST + '/' + PATH);
+        return prefix + '?' + query;
+      }
+
+      // ---- build the format chips ----
+      var formatsEl = document.getElementById('formats');
+      FORMATS.forEach(function (f) {
+        var l = document.createElement('label');
+        l.className = 'chip';
+        l.innerHTML = '<input type="checkbox" value="' + f + '"' + (f === 'qr' ? ' checked' : '') +
+          '><span>' + FORMAT_LABELS[f] + '</span>';
+        formatsEl.appendChild(l);
+      });
+
+      // ---- elements ----
+      var $ = function (id) { return document.getElementById(id); };
+      var els = {
+        name: $('name'), endpoint: $('endpoint'), key: $('key'), includeKey: $('includeKey'),
+        scanner: $('scanner'), continuous: $('continuous'), debounce: $('debounce'),
+        qrcard: $('qrcard'), linkbox: $('linkbox'), copy: $('copy'), openapp: $('openapp'),
+        download: $('download'), keywarn: $('keywarn'), endpointErr: $('endpoint-err')
+      };
+
+      var currentLink = '';
+
+      function readConfig() {
+        var formats = Array.prototype.slice
+          .call(formatsEl.querySelectorAll('input:checked')).map(function (i) { return i.value; });
+        if (formats.length === 0) formats = ['qr']; // matches the app's default
+        var d = parseInt(els.debounce.value, 10);
+        return {
+          name: els.name.value.trim(),
+          apiUrl: els.endpoint.value.trim(),
+          apiKey: els.key.value.trim(),
+          scannerName: els.scanner.value.trim(),
+          formats: formats,
+          continuousMode: els.continuous.checked,
+          debounceMs: (isFinite(d) && d >= 0) ? d : DEFAULT_DEBOUNCE
+        };
+      }
+
+      function render() {
+        var cfg = readConfig();
+        var includeKey = els.includeKey.checked;
+        els.keywarn.classList.toggle('show', includeKey && !!cfg.apiKey);
+
+        var valid = /^https?:\/\/.+/i.test(cfg.apiUrl);
+        els.endpoint.classList.toggle('bad', cfg.apiUrl.length > 0 && !valid);
+        els.endpointErr.hidden = !(cfg.apiUrl.length > 0 && !valid);
+
+        if (!valid) {
+          currentLink = '';
+          els.qrcard.className = 'qrcard empty';
+          els.qrcard.textContent = 'Fill in a valid API URL to generate a setup code.';
+          els.linkbox.textContent = '';
+          els.openapp.hidden = true; els.download.hidden = true;
+          return;
+        }
+
+        currentLink = buildLink(cfg, includeKey, 'https');
+        els.linkbox.textContent = currentLink;
+        els.openapp.hidden = false;
+        els.openapp.href = buildLink(cfg, includeKey, 'scheme');
+        els.download.hidden = false;
+
+        try {
+          var qr = qrcode(0, 'M');
+          qr.addData(currentLink);
+          qr.make();
+          els.qrcard.className = 'qrcard';
+          els.qrcard.innerHTML = qr.createSvgTag({ cellSize: 8, margin: 0, scalable: true });
+        } catch (e) {
+          els.qrcard.className = 'qrcard empty';
+          els.qrcard.textContent = 'This configuration is too long to fit in a QR code — use the link instead.';
+        }
+      }
+
+      // ---- actions ----
+      els.copy.addEventListener('click', function () {
+        if (!currentLink) return;
+        navigator.clipboard.writeText(currentLink).then(function () {
+          var t = els.copy.textContent; els.copy.textContent = 'Copied!';
+          setTimeout(function () { els.copy.textContent = t; }, 1400);
+        });
+      });
+
+      els.download.addEventListener('click', function () {
+        var svg = els.qrcard.querySelector('svg');
+        if (!svg) return;
+        var size = 720;
+        var data = new XMLSerializer().serializeToString(svg);
+        var img = new Image();
+        img.onload = function () {
+          var c = document.createElement('canvas'); c.width = c.height = size;
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+          var pad = size * 0.06;
+          ctx.drawImage(img, pad, pad, size - 2 * pad, size - 2 * pad);
+          var a = document.createElement('a');
+          a.href = c.toDataURL('image/png');
+          a.download = 'ots-setup-' + (readConfig().name || 'config').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
+          a.click();
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+      });
+
+      // re-render on any change
+      document.getElementById('form').addEventListener('input', render);
+      render();
+    </script>
+  </body>
+</html>
