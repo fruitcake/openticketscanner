@@ -56,6 +56,12 @@
       .actions .btn { flex: 1; justify-content: center; min-width: 120px; }
       .note { color: var(--muted); font-size: 13px; margin-top: 16px; line-height: 1.5; }
       .err { color: var(--red); font-size: 14px; margin-top: 8px; }
+      .import { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 22px; }
+      .import label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+      .importrow { display: flex; gap: 10px; }
+      .importrow input { flex: 1; min-width: 0; }
+      .importrow .btn { white-space: nowrap; }
+      .ok { color: var(--green); font-size: 14px; margin-top: 8px; }
     </style>
   </head>
   <body>
@@ -76,6 +82,17 @@
         <h1>Generate a setup code</h1>
         <p class="lede">Fill this in on your computer, then open <strong>Open Ticket Scanner</strong> →
           <em>Scan setup code</em> and point it at the QR. No typing on the phone.</p>
+
+        <div class="import">
+          <label for="importurl">Edit an existing setup <span class="hint">— paste a setup link, QR text, or an API URL</span></label>
+          <div class="importrow">
+            <input type="text" id="importurl" class="mono" inputmode="url"
+              placeholder="https://app.openticketscanner.com/configure?…" />
+            <button type="button" class="btn ghost" id="importbtn">Import</button>
+          </div>
+          <div class="err" id="import-err" hidden>That doesn't look like a setup link or URL.</div>
+          <div class="ok" id="import-ok" hidden>Imported — tweak the fields below.</div>
+        </div>
 
         <div class="field">
           <label for="name">Configuration name</label>
@@ -193,7 +210,9 @@
         name: $('name'), endpoint: $('endpoint'), key: $('key'), includeKey: $('includeKey'),
         scanner: $('scanner'), continuous: $('continuous'), debounce: $('debounce'),
         qrcard: $('qrcard'), linkbox: $('linkbox'), copy: $('copy'), openapp: $('openapp'),
-        download: $('download'), keywarn: $('keywarn'), endpointErr: $('endpoint-err')
+        download: $('download'), keywarn: $('keywarn'), endpointErr: $('endpoint-err'),
+        importurl: $('importurl'), importbtn: $('importbtn'),
+        importErr: $('import-err'), importOk: $('import-ok')
       };
 
       var currentLink = '';
@@ -277,6 +296,73 @@
           a.click();
         };
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+      });
+
+      // ---- import an existing link/URL — mirrors parseConfigLink in configLink.ts ----
+      function parseQuery(query) {
+        var out = {};
+        query.split('&').forEach(function (pair) {
+          if (!pair) return;
+          var eq = pair.indexOf('=');
+          var k = eq === -1 ? pair : pair.slice(0, eq);
+          var v = eq === -1 ? '' : pair.slice(eq + 1);
+          try { out[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, ' ')); } catch (e) {}
+        });
+        return out;
+      }
+      function extractQuery(input) {
+        var t = (input || '').trim();
+        if (!t) return null;
+        var q = t.indexOf('?');
+        if (q === -1) return null;
+        var head = t.slice(0, q).toLowerCase();
+        if (head.indexOf('configure') === -1 && head !== '' && head.charAt(0) !== '?') return null;
+        return t.slice(q + 1);
+      }
+
+      function applyImport() {
+        var input = els.importurl.value.trim();
+        var p = null;
+        var query = extractQuery(input);
+        if (query != null) {
+          var params = parseQuery(query);
+          if (/^https?:\/\/.+/i.test((params.endpoint || '').trim())) p = params;
+        }
+        // Fallback: a bare API URL (no configure query) just fills the endpoint.
+        if (!p && /^https?:\/\/\S+$/i.test(input) && input.toLowerCase().indexOf('configure?') === -1) {
+          p = { endpoint: input };
+        }
+        if (!p) {
+          els.importOk.hidden = true; els.importErr.hidden = false;
+          return;
+        }
+
+        els.endpoint.value = (p.endpoint || '').trim();
+        if ('name' in p) els.name.value = p.name || '';
+        if ('scanner' in p) els.scanner.value = (p.scanner || '').trim();
+        if (p.key && p.key.trim()) { els.key.value = p.key.trim(); els.includeKey.checked = true; }
+        if ('continuous' in p) els.continuous.checked = (p.continuous === '1' || p.continuous === 'true');
+        if ('debounce' in p) {
+          var d = parseInt(p.debounce, 10);
+          els.debounce.value = (isFinite(d) && d >= 0) ? d : DEFAULT_DEBOUNCE;
+        }
+        if ('formats' in p) {
+          var want = {};
+          (p.formats || '').split(',').forEach(function (f) { want[f.trim()] = true; });
+          var any = false;
+          formatsEl.querySelectorAll('input').forEach(function (i) {
+            i.checked = !!want[i.value]; if (i.checked) any = true;
+          });
+          if (!any) { var qr = formatsEl.querySelector('input[value=qr]'); if (qr) qr.checked = true; }
+        }
+
+        els.importErr.hidden = true; els.importOk.hidden = false;
+        render();
+      }
+
+      els.importbtn.addEventListener('click', applyImport);
+      els.importurl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); applyImport(); }
       });
 
       // re-render on any change
