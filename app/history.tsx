@@ -1,16 +1,22 @@
-import { useFocusEffect } from 'expo-router';
+import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useConfigStore } from '../src/state/configStore';
 import { clearHistory, listScans } from '../src/storage/history';
 import type { ScanRecord } from '../src/tickets/types';
 import { HistoryRow } from '../src/ui/HistoryRow';
 import { colors } from '../src/ui/theme';
 
 export default function HistoryScreen() {
+  const { configId } = useLocalSearchParams<{ configId?: string }>();
+  const config = useConfigStore((s) => (configId ? s.get(configId) : undefined));
   const [scans, setScans] = useState<ScanRecord[]>([]);
 
-  const refresh = useCallback(() => setScans(listScans({ limit: 500 })), []);
+  const refresh = useCallback(
+    () => setScans(listScans({ configId, limit: 500 })),
+    [configId],
+  );
 
   // Reload whenever the screen comes into focus (e.g. after scanning).
   useFocusEffect(
@@ -19,22 +25,29 @@ export default function HistoryScreen() {
     }, [refresh]),
   );
 
+  const scopeLabel = config ? `“${config.name}”` : 'all configurations';
+
   const onClear = () => {
-    Alert.alert('Clear history', 'Delete all scan history? This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear',
-        style: 'destructive',
-        onPress: () => {
-          clearHistory();
-          refresh();
+    Alert.alert(
+      'Clear history',
+      `Delete scan history for ${scopeLabel}? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear',
+          style: 'destructive',
+          onPress: () => {
+            clearHistory(configId);
+            refresh();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   return (
     <View style={styles.screen}>
+      <Stack.Screen options={{ title: config ? `History · ${config.name}` : 'Scan History' }} />
       <FlatList
         data={scans}
         keyExtractor={(s) => s.id}

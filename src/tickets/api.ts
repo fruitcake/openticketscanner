@@ -1,3 +1,4 @@
+import { getAppVersion, getDeviceId } from '../utils/device';
 import type { CodeFormat, TicketConfig } from './types';
 
 export interface TicketApiResponse {
@@ -26,6 +27,7 @@ export async function postTicket(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
+    'X-App-Version': getAppVersion(),
   };
   if (config.apiKey) {
     // Sent both ways so most servers work out of the box; adjust to taste.
@@ -41,6 +43,8 @@ export async function postTicket(
         code,
         type,
         configId: config.id,
+        scannerName: config.scannerName,
+        deviceId: getDeviceId(),
         scannedAt: new Date().toISOString(),
       }),
       signal: controller.signal,

@@ -75,7 +75,11 @@ export function listScans(options?: { configId?: string; limit?: number }): Scan
   return rows.map(toRecord);
 }
 
-/** Delete all scan history. */
-export function clearHistory(): void {
-  db.execSync(`DELETE FROM scans`);
+/** Delete scan history — all of it, or just one config's when `configId` is given. */
+export function clearHistory(configId?: string): void {
+  if (configId) {
+    db.runSync(`DELETE FROM scans WHERE configId = ?`, configId);
+  } else {
+    db.execSync(`DELETE FROM scans`);
+  }
 }

@@ -18,11 +18,11 @@ export default function ConfigListScreen() {
           <Text style={styles.empty}>No configurations yet. Add one below.</Text>
         }
         renderItem={({ item }) => (
-          <Pressable
-            style={styles.row}
-            onPress={() => router.push(`/tickets/configs/${item.id}`)}
-          >
-            <View style={styles.rowMain}>
+          <View style={styles.row}>
+            <Pressable
+              style={styles.rowMain}
+              onPress={() => router.push(`/tickets/configs/${item.id}`)}
+            >
               <Text style={styles.name}>{item.name}</Text>
               <Text style={styles.url} numberOfLines={1}>
                 {item.apiUrl}
@@ -31,15 +31,27 @@ export default function ConfigListScreen() {
                 {item.formats.length} format{item.formats.length === 1 ? '' : 's'} ·{' '}
                 {item.continuousMode ? 'continuous' : 'stop on each'} · {item.debounceMs}ms
               </Text>
-            </View>
-            <Text style={styles.chevron}>›</Text>
-          </Pressable>
+            </Pressable>
+            <Pressable
+              style={styles.shareButton}
+              onPress={() => router.push(`/share/${item.id}`)}
+              hitSlop={8}
+              accessibilityLabel={`Share ${item.name}`}
+            >
+              <Text style={styles.shareIcon}>📤</Text>
+            </Pressable>
+          </View>
         )}
       />
 
-      <Pressable style={styles.addButton} onPress={() => router.push('/tickets/configs/new')}>
-        <Text style={styles.addButtonText}>+ Add configuration</Text>
-      </Pressable>
+      <View style={styles.footer}>
+        <Pressable style={styles.scanButton} onPress={() => router.push('/configure-scan')}>
+          <Text style={styles.scanButtonText}>⛶ Scan setup code</Text>
+        </Pressable>
+        <Pressable style={styles.addButton} onPress={() => router.push('/tickets/configs/new')}>
+          <Text style={styles.addButtonText}>+ Add configuration</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -61,9 +73,23 @@ const styles = StyleSheet.create({
   name: { color: colors.text, fontSize: 17, fontWeight: '700' },
   url: { color: colors.textMuted, fontSize: 13 },
   meta: { color: colors.textMuted, fontSize: 12 },
-  chevron: { color: colors.textMuted, fontSize: 28, paddingLeft: 8 },
+  shareButton: {
+    paddingLeft: 12,
+    paddingVertical: 8,
+    alignSelf: 'center',
+  },
+  shareIcon: { fontSize: 20 },
+  footer: { padding: 16, paddingTop: 0, gap: 10 },
+  scanButton: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  scanButtonText: { color: colors.text, fontSize: 16, fontWeight: '700' },
   addButton: {
-    margin: 16,
     backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,

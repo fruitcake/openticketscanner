@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useConfigStore } from '../src/state/configStore';
 import { colors } from '../src/ui/theme';
+import { getDeviceId } from '../src/utils/device';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -54,9 +55,18 @@ export default function HomeScreen() {
         ))
       )}
 
-      <Pressable style={styles.ghostButton} onPress={() => router.push('/history')}>
-        <Text style={styles.ghostButtonText}>📜 View scan history</Text>
-      </Pressable>
+      <View style={styles.footerRow}>
+        <Pressable style={styles.ghostButton} onPress={() => router.push('/history')}>
+          <Text style={styles.ghostButtonText}>📜 History</Text>
+        </Pressable>
+        <Pressable style={styles.ghostButton} onPress={() => router.push('/settings')}>
+          <Text style={styles.ghostButtonText}>⚙️ Settings</Text>
+        </Pressable>
+      </View>
+
+      <Text style={styles.deviceId} selectable numberOfLines={1}>
+        Device ID: {getDeviceId()}
+      </Text>
     </ScrollView>
   );
 }
@@ -102,6 +112,15 @@ const styles = StyleSheet.create({
   emptyTitle: { color: colors.text, fontSize: 16, fontWeight: '700' },
   emptySub: { color: colors.textMuted, fontSize: 13, textAlign: 'center' },
   emptyCta: { color: colors.primary, fontSize: 15, fontWeight: '700', marginTop: 8 },
-  ghostButton: { alignItems: 'center', paddingVertical: 16, marginTop: 8 },
+  footerRow: { flexDirection: 'row', marginTop: 8 },
+  ghostButton: { flex: 1, alignItems: 'center', paddingVertical: 16 },
   ghostButtonText: { color: colors.textMuted, fontSize: 15, fontWeight: '600' },
+  deviceId: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: 'monospace',
+    textAlign: 'center',
+    marginTop: 8,
+    opacity: 0.7,
+  },
 });

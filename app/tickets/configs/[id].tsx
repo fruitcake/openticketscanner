@@ -26,6 +26,7 @@ export default function ConfigEditScreen() {
   const [name, setName] = useState(existing?.name ?? '');
   const [apiUrl, setApiUrl] = useState(existing?.apiUrl ?? '');
   const [apiKey, setApiKey] = useState(existing?.apiKey ?? '');
+  const [scannerName, setScannerName] = useState(existing?.scannerName ?? '');
   const [formats, setFormats] = useState<CodeFormat[]>(existing?.formats ?? ['qr']);
   const [continuousMode, setContinuousMode] = useState(existing?.continuousMode ?? false);
   const [debounce, setDebounce] = useState(String(existing?.debounceMs ?? DEFAULT_DEBOUNCE_MS));
@@ -52,6 +53,7 @@ export default function ConfigEditScreen() {
       name: trimmedName,
       apiUrl: trimmedUrl,
       apiKey: apiKey.trim() || undefined,
+      scannerName: scannerName.trim() || undefined,
       formats,
       continuousMode,
       debounceMs: Number.isFinite(debounceMs) && debounceMs >= 0 ? debounceMs : DEFAULT_DEBOUNCE_MS,
@@ -102,6 +104,17 @@ export default function ConfigEditScreen() {
           keyboardType="url"
           inputMode="url"
         />
+      </Field>
+
+      <Field label="Scanner name (optional)">
+        <TextInput
+          style={styles.input}
+          value={scannerName}
+          onChangeText={setScannerName}
+          placeholder="Lane 1 / North entrance"
+          placeholderTextColor={colors.textMuted}
+        />
+        <Text style={styles.hint}>Sent with each scan to identify this device/lane.</Text>
       </Field>
 
       <Field label="API key (optional)">
@@ -166,6 +179,12 @@ export default function ConfigEditScreen() {
       <Pressable style={styles.saveButton} onPress={onSave}>
         <Text style={styles.saveButtonText}>{isNew ? 'Create configuration' : 'Save changes'}</Text>
       </Pressable>
+
+      {!isNew && (
+        <Pressable style={styles.shareButton} onPress={() => router.push(`/share/${id}`)}>
+          <Text style={styles.shareButtonText}>📤 Share / set up another device</Text>
+        </Pressable>
+      )}
 
       {!isNew && (
         <Pressable style={styles.deleteButton} onPress={onDelete}>
@@ -234,6 +253,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  shareButton: {
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  shareButtonText: { color: colors.text, fontSize: 15, fontWeight: '600' },
   deleteButton: { paddingVertical: 14, alignItems: 'center' },
   deleteButtonText: { color: colors.danger, fontSize: 15, fontWeight: '600' },
 });

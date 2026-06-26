@@ -1,0 +1,5 @@
+# Cloudflare Pages headers.
+# The Apple App Site Association file has no extension, so Pages would serve it
+# as the wrong content-type. Apple expects application/json.
+/.well-known/apple-app-site-association
+  Content-Type: application/json

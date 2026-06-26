@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.openticketscanner.app",
+      "sha256_cert_fingerprints": [
+        "41:56:10:B5:E6:E1:76:45:5D:55:D3:0B:A2:47:75:2E:52:EB:98:96:1E:F6:92:71:84:68:2B:39:4A:63:6B:D5"
+      ]
+    }
+  }
+]

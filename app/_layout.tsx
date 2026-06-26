@@ -18,12 +18,19 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: colors.bg },
           }}
         >
-          <Stack.Screen name="index" options={{ title: 'Open Ticket Scanner' }} />
+          <Stack.Screen
+            name="index"
+            options={{ title: '🏠', headerTitle: 'Open Ticket Scanner' }}
+          />
           <Stack.Screen name="scan" options={{ title: 'Scan Mode' }} />
           <Stack.Screen name="history" options={{ title: 'Scan History' }} />
+          <Stack.Screen name="settings" options={{ title: 'Settings' }} />
           <Stack.Screen name="tickets/configs/index" options={{ title: 'Configurations' }} />
           <Stack.Screen name="tickets/configs/[id]" options={{ title: 'Configuration' }} />
           <Stack.Screen name="tickets/[configId]/scan" options={{ headerShown: false }} />
+          <Stack.Screen name="configure" options={{ title: 'Add configuration' }} />
+          <Stack.Screen name="configure-scan" options={{ headerShown: false }} />
+          <Stack.Screen name="share/[configId]" options={{ title: 'Share configuration' }} />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -44,6 +44,8 @@ export interface TicketConfig {
   name: string;
   apiUrl: string;
   apiKey?: string;
+  /** Optional label sent with each scan to identify this scanner/lane. */
+  scannerName?: string;
   /** Which code formats this config scans for. */
   formats: CodeFormat[];
   /** When true, keep scanning hands-free; otherwise pause until "Continue". */

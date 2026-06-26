@@ -1,8 +1,19 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { CameraScanner } from '../../../src/camera/CameraScanner';
+import { playScanFeedback } from '../../../src/feedback/feedback';
 import { useConfigStore } from '../../../src/state/configStore';
 import { postTicket } from '../../../src/tickets/api';
 import { errorResult, parseTicketResponse } from '../../../src/tickets/parseTicketResponse';
@@ -25,6 +36,8 @@ export default function TicketScanScreen() {
   const [previous, setPrevious] = useState<ScanRecord | null>(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualCode, setManualCode] = useState('');
 
   // Guards against overlapping validations while a request is in flight.
   const busyRef = useRef(false);
@@ -40,6 +53,10 @@ export default function TicketScanScreen() {
     async (scanned: string, type: string) => {
       if (!config || busyRef.current) return;
       busyRef.current = true;
+      if (toastTimer.current) {
+        clearTimeout(toastTimer.current);
+        toastTimer.current = null;
+      }
       setBusy(true);
       setCode(scanned);
 
@@ -72,15 +89,17 @@ export default function TicketScanScreen() {
       setPrevious(prior);
       setResult(scanResult);
       setBusy(false);
+      playScanFeedback(scanResult.status);
 
-      if (config.continuousMode) {
-        // Keep scanning; auto-dismiss the toast and free the guard.
-        toastTimer.current = setTimeout(() => {
-          setResult(null);
-          busyRef.current = false;
-        }, TOAST_MS);
+      // Continuous mode only uses the lightweight toast for SUCCESS. A
+      // warning/error/rejection shows the full blocking popup that the operator
+      // must dismiss — so problems aren't missed in a fast-scanning flow.
+      if (config.continuousMode && scanResult.status === 'green') {
+        // Resume scanning immediately; the toast lingers then auto-dismisses.
+        busyRef.current = false;
+        toastTimer.current = setTimeout(() => setResult(null), TOAST_MS);
       }
-      // Non-continuous: guard stays held until "Continue" is pressed.
+      // Otherwise the guard stays held until "Continue" is pressed.
     },
     [config],
   );
@@ -90,6 +109,14 @@ export default function TicketScanScreen() {
     setPrevious(null);
     busyRef.current = false;
   }, []);
+
+  const submitManual = useCallback(() => {
+    const value = manualCode.trim();
+    if (!value) return;
+    setManualOpen(false);
+    setManualCode('');
+    void handleScan(value, 'manual');
+  }, [manualCode, handleScan]);
 
   if (!config) {
     return (
@@ -104,11 +131,12 @@ export default function TicketScanScreen() {
   }
 
   const continuous = config.continuousMode;
-  // In continuous mode the camera never pauses; otherwise it pauses while a
-  // blocking result popup is shown.
-  const cameraActive = continuous ? true : result === null && !busy;
-  const showOverlay = !continuous && result !== null;
-  const showToast = continuous && result !== null;
+  // Toast = continuous-mode success only. Everything else (non-continuous, or a
+  // continuous warning/error) gets the full blocking popup.
+  const showToast = continuous && result !== null && result.status === 'green';
+  const showOverlay = result !== null && !showToast;
+  // The camera stays live unless a blocking popup is up.
+  const cameraActive = !showOverlay && !busy;
 
   return (
     <View style={styles.fill}>
@@ -137,7 +165,63 @@ export default function TicketScanScreen() {
         )}
 
         {showToast && result && <ScanToast result={result} code={code} />}
+
+        {cameraActive && !result && !busy && (
+          <View style={styles.actionRow}>
+            <Pressable style={styles.actionPill} onPress={() => setManualOpen(true)}>
+              <Text style={styles.actionPillText}>⌨  Manual</Text>
+            </Pressable>
+            <Pressable
+              style={styles.actionPill}
+              onPress={() => router.push({ pathname: '/history', params: { configId: config.id } })}
+            >
+              <Text style={styles.actionPillText}>📜  History</Text>
+            </Pressable>
+          </View>
+        )}
       </CameraScanner>
+
+      <Modal
+        visible={manualOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setManualOpen(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.manualBackdrop}
+        >
+          <View style={styles.manualCard}>
+            <Text style={styles.manualTitle}>Enter ticket code</Text>
+            <TextInput
+              style={styles.manualInput}
+              value={manualCode}
+              onChangeText={setManualCode}
+              placeholder="Type or paste the code"
+              placeholderTextColor={colors.textMuted}
+              autoFocus
+              autoCapitalize="characters"
+              autoCorrect={false}
+              onSubmitEditing={submitManual}
+              returnKeyType="done"
+            />
+            <View style={styles.manualActions}>
+              <Pressable
+                style={[styles.manualAction, styles.manualCancel]}
+                onPress={() => {
+                  setManualOpen(false);
+                  setManualCode('');
+                }}
+              >
+                <Text style={styles.manualCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={[styles.manualAction, styles.manualSubmit]} onPress={submitManual}>
+                <Text style={styles.manualSubmitText}>Validate</Text>
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -160,4 +244,52 @@ const styles = StyleSheet.create({
   missingText: { color: colors.text, fontSize: 16, textAlign: 'center' },
   missingButton: { backgroundColor: colors.primary, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 12 },
   missingButtonText: { color: '#fff', fontWeight: '700' },
+  actionRow: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionPill: {
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  actionPillText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  manualBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  manualCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 20,
+    gap: 16,
+  },
+  manualTitle: { color: colors.text, fontSize: 18, fontWeight: '700' },
+  manualInput: {
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    color: colors.text,
+    fontSize: 17,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  manualActions: { flexDirection: 'row', gap: 12 },
+  manualAction: { flex: 1, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
+  manualCancel: { backgroundColor: colors.surfaceAlt },
+  manualCancelText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  manualSubmit: { backgroundColor: colors.primary },
+  manualSubmitText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

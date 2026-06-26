@@ -10,12 +10,27 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.openticketscanner.app",
+      "associatedDomains": ["applinks:app.openticketscanner.com"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.openticketscanner.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "app.openticketscanner.com",
+              "pathPrefix": "/configure"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -35,7 +50,8 @@
         {
           "cameraPermission": "Open Ticket Scanner uses the camera to scan tickets and barcodes."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true

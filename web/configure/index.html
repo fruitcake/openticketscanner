@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open Ticket Scanner — Set up device</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #0b0f14;
+        color: #e6edf3;
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        max-width: 420px;
+        width: 100%;
+        background: #161b22;
+        border: 1px solid #2a323c;
+        border-radius: 16px;
+        padding: 28px;
+        text-align: center;
+      }
+      h1 { font-size: 20px; margin: 0 0 8px; }
+      p { color: #9aa7b4; font-size: 14px; line-height: 1.5; }
+      a.button {
+        display: block;
+        margin: 18px 0 10px;
+        background: #3b82f6;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 700;
+        padding: 14px;
+        border-radius: 10px;
+      }
+      .stores { display: flex; gap: 12px; justify-content: center; margin-top: 14px; }
+      .stores a { color: #3b82f6; font-size: 14px; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Set up this scanner</h1>
+      <p>
+        If Open Ticket Scanner is installed, this link opens it automatically. Otherwise, install
+        the app and tap the button below.
+      </p>
+      <a class="button" id="open" href="#">Open in Open Ticket Scanner</a>
+      <div class="stores">
+        <!-- TODO: replace with your real store URLs -->
+        <a href="#">App Store</a>
+        <a href="#">Google Play</a>
+      </div>
+    </div>
+    <script>
+      // Fall back to the custom scheme, preserving the query params.
+      var open = document.getElementById('open');
+      open.href = 'openticketscanner://configure' + window.location.search;
+    </script>
+  </body>
+</html>

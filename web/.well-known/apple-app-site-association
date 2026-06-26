@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "LZ4V637C7M.com.openticketscanner.app",
+        "paths": ["/configure*"]
+      }
+    ]
+  }
+}
