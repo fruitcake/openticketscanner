@@ -1,5 +1,7 @@
 # Open Ticket Scanner
 
+[![Fruitcake](https://img.shields.io/badge/Powered%20By-Fruitcake-b2bc35.svg)](https://fruitcake.nl)
+
 An open-source QR / barcode **ticket scanner** built with Expo + React Native. Two modes:
 
 - **Scan mode** — decode any QR or barcode and show its contents. No backend.
