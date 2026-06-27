@@ -10,6 +10,7 @@
   --primary-2: #2563eb;
   --blue-glow: #1d4ed8;
   --green: #1f9d55;
+  --green-soft: #34d399;
   --yellow: #d9a300;
   --red: #cc2936;
   --maxw: 1080px;
@@ -65,7 +66,7 @@ a:hover { text-decoration: underline; }
   text-align: center;
   padding: 88px 0 64px;
   background:
-    radial-gradient(1200px 520px at 50% -10%, rgba(37, 99, 235, 0.35), transparent 60%),
+    radial-gradient(1200px 520px at 50% -10%, rgba(52, 211, 153, 0.28), transparent 60%),
     var(--bg);
 }
 .hero .appicon { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 18px 50px rgba(0,0,0,.45); }
@@ -102,6 +103,23 @@ section .sub { text-align: center; color: var(--muted); margin: 0 auto 40px; max
 
 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; }
 .dot.g { background: var(--green); } .dot.y { background: var(--yellow); } .dot.r { background: var(--red); }
+
+/* ---- about ---- */
+.about {
+  display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  max-width: 800px; margin: 0 auto;
+}
+.about-card {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px;
+}
+.about-card:hover { text-decoration: none; border-color: #3a4654; }
+.about-card .fc-mark { width: 30px; height: 33px; flex: 0 0 auto; margin-top: 2px; }
+.about-card .emoji { font-size: 28px; line-height: 1.1; flex: 0 0 auto; }
+.about-card h3 { margin: 0 0 6px; font-size: 18px; color: var(--text); }
+.about-card p { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
+.about-card .lk { color: var(--green-soft); font-weight: 600; font-size: 14px; }
 
 /* ---- open source band ---- */
 .band {
