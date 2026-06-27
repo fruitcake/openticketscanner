@@ -25,6 +25,7 @@ export default function RootLayout() {
           <Stack.Screen name="scan" options={{ title: 'Scan Mode' }} />
           <Stack.Screen name="history" options={{ title: 'Scan History' }} />
           <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+          <Stack.Screen name="about" options={{ title: 'About' }} />
           <Stack.Screen name="tickets/configs/index" options={{ title: 'Configurations' }} />
           <Stack.Screen name="tickets/configs/[id]" options={{ title: 'Configuration' }} />
           <Stack.Screen name="tickets/[configId]/scan" options={{ headerShown: false }} />

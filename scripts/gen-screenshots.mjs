@@ -8,7 +8,7 @@ const C = {
   bg: '#0b0f14', surface: '#161b22', surfaceAlt: '#1f2630',
   text: '#e6edf3', muted: '#9aa7b4', border: '#2a323c',
   primary: '#3b82f6', green: '#1f9d55', yellow: '#d9a300', red: '#cc2936',
-  blue1: '#60a5fa', blue2: '#1d4ed8', ink: '#0f172a', white: '#ffffff',
+  ink: '#0f172a', white: '#ffffff',
 };
 
 // Canvas = App Store 6.5"/6.7" portrait (1284 x 2778) — an Apple-accepted size
@@ -43,6 +43,68 @@ function reticle(cx, cy, b, sw, arm, color, opacity = 1) {
   const k = (x, y, dx, dy) =>
     `<path d="M ${x} ${y + dy * arm} L ${x} ${y} L ${x + dx * arm} ${y}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`;
   return `<g opacity="${opacity}">${k(L, T, 1, 1) + k(R, T, -1, 1) + k(L, B, 1, -1) + k(R, B, -1, -1)}</g>`;
+}
+
+// ---- App icon mark (mirrors scripts/gen-icons.mjs) for marketing badges ----
+const ICO = { d1: '#0e2a1d', d2: '#05080a', green: '#22c55e', bracket: '#34d399', white: '#ffffff', ink: '#0f172a' };
+
+function icoFinder(x, y, s) {
+  const g = s / 7;
+  return rrect(x, y, s, s, g * 0.9, ICO.ink) +
+    rrect(x + g, y + g, s - 2 * g, s - 2 * g, g * 0.6, ICO.white) +
+    rrect(x + 2 * g, y + 2 * g, s - 4 * g, s - 4 * g, g * 0.4, ICO.ink);
+}
+function icoQr(x, y, size) {
+  const f = size * 0.32;
+  let s = icoFinder(x, y, f) + icoFinder(x + size - f, y, f) + icoFinder(x, y + size - f, f);
+  const m = size * 0.1;
+  const cells = [
+    [0.62, 0.62], [0.74, 0.62], [0.86, 0.62], [0.62, 0.74], [0.86, 0.74],
+    [0.62, 0.86], [0.74, 0.86], [0.86, 0.86], [0.5, 0.74], [0.74, 0.5], [0.5, 0.5],
+  ];
+  for (const [cx, cy] of cells) {
+    s += `<rect x="${x + cx * size}" y="${y + cy * size}" width="${m}" height="${m}" rx="${m * 0.25}" fill="${ICO.ink}"/>`;
+  }
+  return s;
+}
+function icoTicketPath(x, y, w, h, r, nr) {
+  const L = x, R = x + w, T = y, B = y + h, midY = y + h / 2;
+  return `M ${L + r} ${T} L ${R - r} ${T} A ${r} ${r} 0 0 1 ${R} ${T + r} L ${R} ${midY - nr} ` +
+    `A ${nr} ${nr} 0 0 0 ${R} ${midY + nr} L ${R} ${B - r} A ${r} ${r} 0 0 1 ${R - r} ${B} ` +
+    `L ${L + r} ${B} A ${r} ${r} 0 0 1 ${L} ${B - r} L ${L} ${midY + nr} ` +
+    `A ${nr} ${nr} 0 0 0 ${L} ${midY - nr} L ${L} ${T + r} A ${r} ${r} 0 0 1 ${L + r} ${T} Z`;
+}
+function icoCheck(cx, cy, r) {
+  const k = r * 0.42;
+  return `<circle cx="${cx}" cy="${cy}" r="${r + 12}" fill="${ICO.white}"/>` +
+    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${ICO.green}"/>` +
+    `<path d="M ${cx - k} ${cy + k * 0.1} L ${cx - k * 0.3} ${cy + k * 0.85} L ${cx + k} ${cy - k * 0.8}" ` +
+    `fill="none" stroke="${ICO.white}" stroke-width="${r * 0.28}" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+function icoCard() {
+  const w = 300, h = 360, x = 512 - w / 2, y = 512 - h / 2, r = 40, nr = 30;
+  const qrSize = w - 84, qx = x + 42, qy = 512 - qrSize / 2;
+  return `<path d="${icoTicketPath(x, y, w, h, r, nr)}" fill="${ICO.white}"/>${icoQr(qx, qy, qrSize)}${icoCheck(512, 512, 62)}`;
+}
+// The full app icon badge, centered at (cx,cy) at the given pixel `size`.
+// `id` keeps the gradient/clip/filter ids unique within one SVG file.
+function appIcon(cx, cy, size, id) {
+  const f = size / 1024;
+  const mark = `<g transform="translate(512 512) scale(1.22) translate(-512 -512)">` +
+    reticle(512, 512, 248, 34, 104, ICO.bracket, 1) + icoCard() + `</g>`;
+  return `<defs>
+    <radialGradient id="icg${id}" cx="512" cy="430" r="680" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="${ICO.d1}"/><stop offset="1" stop-color="${ICO.d2}"/>
+    </radialGradient>
+    <clipPath id="icc${id}"><rect x="0" y="0" width="1024" height="1024" rx="230"/></clipPath>
+    <filter id="ics${id}" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="34" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <g transform="translate(${cx - size / 2} ${cy - size / 2}) scale(${f})">
+    <rect x="0" y="0" width="1024" height="1024" rx="230" fill="url(#icg${id})" filter="url(#ics${id})"/>
+    <g clip-path="url(#icc${id})">${mark}</g>
+  </g>`;
 }
 
 function header(title, { torch = false } = {}) {
@@ -246,18 +308,19 @@ function frame(inner) {
 function poster({ title, subtitle, screen }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
     <defs>
-      <linearGradient id="poster" x1="0" y1="0" x2="0" y2="${H}" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="${C.blue2}"/>
-        <stop offset="0.55" stop-color="#0b1a3a"/>
+      <radialGradient id="poster" cx="${W / 2}" cy="430" r="1500" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#123226"/>
+        <stop offset="0.45" stop-color="#0a1813"/>
         <stop offset="1" stop-color="${C.bg}"/>
-      </linearGradient>
+      </radialGradient>
       <linearGradient id="camv" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="#0b1118"/><stop offset="1" stop-color="#05070a"/>
       </linearGradient>
     </defs>
     <rect width="${W}" height="${H}" fill="url(#poster)"/>
-    ${text(W / 2, 250, title, { size: 86, color: C.white, weight: 800, anchor: 'middle' })}
-    ${text(W / 2, 358, subtitle, { size: 46, color: '#c7d2fe', weight: 500, anchor: 'middle' })}
+    ${appIcon(W / 2, 170, 150, 'p')}
+    ${text(W / 2, 338, title, { size: 80, color: C.white, weight: 800, anchor: 'middle' })}
+    ${text(W / 2, 422, subtitle, { size: 46, color: '#a7f3d0', weight: 500, anchor: 'middle' })}
     ${frame(screen)}
   </svg>`;
 }
@@ -416,25 +479,17 @@ const shots = {
 // ---- Google Play feature graphic (1024 x 500) ----
 function featureGraphic() {
   const w = 1024, h = 500;
-  // small brand mark: white QR card + green check, on the gradient
-  const mx = 120, my = 250, ms = 150;
-  const mark = `
-    <rect x="${mx - ms / 2}" y="${my - ms / 2}" width="${ms}" height="${ms}" rx="28" fill="${C.white}"/>
-    ${qrGlyph(mx - ms / 2 + 26, my - ms / 2 + 26, ms - 52)}
-    <g transform="translate(${mx + ms / 2 - 8} ${my - ms / 2 + 8})">
-      <circle r="34" fill="${C.green}"/>
-      <path d="M -16 1 L -5 13 L 17 -14" fill="none" stroke="${C.white}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-    </g>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     <defs>
-      <linearGradient id="fg" x1="0" y1="0" x2="${w}" y2="${h}" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="${C.blue1}"/><stop offset="1" stop-color="${C.blue2}"/>
-      </linearGradient>
+      <radialGradient id="fg" cx="300" cy="250" r="900" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#123226"/><stop offset="0.5" stop-color="#0a1813"/><stop offset="1" stop-color="${C.bg}"/>
+      </radialGradient>
     </defs>
     <rect width="${w}" height="${h}" fill="url(#fg)"/>
-    ${mark}
-    ${text(250, 232, 'Open Ticket Scanner', { size: 76, color: C.white, weight: 800 })}
-    ${text(252, 300, 'Scan & validate tickets against your own API', { size: 38, color: '#e6efff', weight: 500 })}
+    ${appIcon(140, 250, 196, 'f')}
+    ${text(296, 206, 'Open Ticket Scanner', { size: 64, color: C.white, weight: 800 })}
+    ${text(298, 270, 'Validate tickets against your own API', { size: 36, color: '#a7f3d0', weight: 500 })}
+    ${text(298, 326, 'Open source · bring your own backend', { size: 30, color: C.muted, weight: 500 })}
   </svg>`;
 }
 writeFileSync(`${TMP}/feature.svg`, featureGraphic());

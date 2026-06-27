@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { playScanFeedback } from '../src/feedback/feedback';
 import { useSettingsStore } from '../src/state/settingsStore';
@@ -6,6 +7,7 @@ import { colors } from '../src/ui/theme';
 import { getAppVersion, getDeviceId } from '../src/utils/device';
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const { hapticsEnabled, soundEnabled, setHaptics, setSound } = useSettingsStore();
 
   return (
@@ -39,6 +41,15 @@ export default function SettingsScreen() {
         The device ID and app version are sent with every ticket scan (ID in the body, version as
         the X-App-Version header).
       </Text>
+
+      <Text style={styles.section}>About</Text>
+      <Pressable
+        style={({ pressed }) => [styles.infoRow, pressed && styles.rowPressed]}
+        onPress={() => router.push('/about')}
+      >
+        <Text style={styles.rowTitle}>About Open Ticket Scanner</Text>
+        <Text style={styles.chevron}>›</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -111,6 +122,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: 16,
   },
+  rowPressed: { opacity: 0.7 },
+  chevron: { color: colors.textMuted, fontSize: 22, fontWeight: '600' },
   infoValue: { color: colors.textMuted, fontSize: 14, flexShrink: 1, textAlign: 'right' },
   mono: { fontFamily: 'monospace', fontSize: 12 },
   note: { color: colors.textMuted, fontSize: 12, paddingHorizontal: 4 },

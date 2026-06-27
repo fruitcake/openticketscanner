@@ -2,7 +2,7 @@
   "expo": {
     "name": "Open Ticket Scanner",
     "slug": "openticketscanner",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "openticketscanner",
@@ -20,6 +20,7 @@
     },
     "android": {
       "package": "nl.fruitcake.openticketscanner",
+      "versionCode": 10010,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -38,7 +39,7 @@
         }
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#2563eb",
+        "backgroundColor": "#0e2a1d",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

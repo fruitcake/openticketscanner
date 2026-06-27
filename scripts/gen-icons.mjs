@@ -3,23 +3,26 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 
-const BLUE1 = '#60a5fa';
-const BLUE2 = '#2563eb';
-const DARK = '#0b0f14';
+const DARK1 = '#0e2a1d'; // dark green — glow center
+const DARK2 = '#05080a'; // near-black — edges
 const WHITE = '#ffffff';
 const INK = '#0f172a';
-const GREEN = '#22c55e';
+const GREEN = '#22c55e'; // valid-check green
+const BRACKET = '#34d399'; // scan reticle — slightly lighter/teal so it reads apart from the check
 
 const TMP = 'scripts/.icons-tmp';
 mkdirSync(TMP, { recursive: true });
 
 const defs = `
-  <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
-    <stop offset="0" stop-color="${BLUE1}"/>
-    <stop offset="1" stop-color="${BLUE2}"/>
-  </linearGradient>
+  <radialGradient id="bg" cx="512" cy="430" r="680" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="${DARK1}"/>
+    <stop offset="1" stop-color="${DARK2}"/>
+  </radialGradient>
   <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-    <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.18"/>
+    <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.30"/>
+  </filter>
+  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="${GREEN}" flood-opacity="0.45"/>
   </filter>`;
 
 // One finder-pattern square (the QR corner markers).
@@ -47,8 +50,39 @@ function qr(x, y, size, color = INK) {
   return s;
 }
 
+// Rounded-rectangle ticket outline with a semicircular notch punched out of the
+// left and right edges at mid-height (the classic ticket-stub silhouette).
+function ticketPath(x, y, w, h, r, nr) {
+  const L = x, R = x + w, T = y, B = y + h, midY = y + h / 2;
+  return `M ${L + r} ${T}
+    L ${R - r} ${T}
+    A ${r} ${r} 0 0 1 ${R} ${T + r}
+    L ${R} ${midY - nr}
+    A ${nr} ${nr} 0 0 0 ${R} ${midY + nr}
+    L ${R} ${B - r}
+    A ${r} ${r} 0 0 1 ${R - r} ${B}
+    L ${L + r} ${B}
+    A ${r} ${r} 0 0 1 ${L} ${B - r}
+    L ${L} ${midY + nr}
+    A ${nr} ${nr} 0 0 0 ${L} ${midY - nr}
+    L ${L} ${T + r}
+    A ${r} ${r} 0 0 1 ${L + r} ${T}
+    Z`;
+}
+
+// Centered "valid" check disc, with a white halo ring that separates it from
+// the QR modules behind it.
+function checkBadge(cx = 512, cy = 512, r = 62) {
+  const k = r * 0.42;
+  return `
+    <circle cx="${cx}" cy="${cy}" r="${r + 12}" fill="${WHITE}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${GREEN}" filter="url(#glow)"/>
+    <path d="M ${cx - k} ${cy + k * 0.1} L ${cx - k * 0.3} ${cy + k * 0.85} L ${cx + k} ${cy - k * 0.8}"
+          fill="none" stroke="${WHITE}" stroke-width="${r * 0.28}" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
 // Scan reticle (4 rounded corner brackets) around a centered box of half-extent `b`.
-function reticle(b, sw = 34, arm = 104, color = WHITE) {
+function reticle(b, sw = 34, arm = 104, color = BRACKET) {
   const cx = 512, cy = 512;
   const L = cx - b, R = cx + b, T = cy - b, B = cy + b;
   const k = (x, y, dx, dy) =>
@@ -56,19 +90,16 @@ function reticle(b, sw = 34, arm = 104, color = WHITE) {
   return k(L, T, 1, 1) + k(R, T, -1, 1) + k(L, B, 1, -1) + k(R, B, -1, -1);
 }
 
-// The white QR card with a small "valid" check badge.
-function card({ badge = true } = {}) {
-  const w = 300, h = 300, x = 512 - w / 2, y = 512 - h / 2;
-  const badgeSvg = badge
-    ? `<g transform="translate(${x + w - 18} ${y + 18})">
-         <circle r="54" fill="${GREEN}"/>
-         <path d="M -26 2 L -8 22 L 28 -22" fill="none" stroke="${WHITE}" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-       </g>`
-    : '';
+// The white ticket card: stub silhouette + QR fill + centered check.
+function card({ check = true } = {}) {
+  const w = 300, h = 360, x = 512 - w / 2, y = 512 - h / 2;
+  const r = 40, nr = 30;
+  const qrSize = w - 84; // inset from the ticket edges
+  const qx = x + 42, qy = 512 - qrSize / 2;
   return `
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="44" fill="${WHITE}" filter="url(#soft)"/>
-    ${qr(x + 46, y + 46, w - 92)}
-    ${badgeSvg}`;
+    <path d="${ticketPath(x, y, w, h, r, nr)}" fill="${WHITE}" filter="url(#soft)"/>
+    ${qr(qx, qy, qrSize)}
+    ${check ? checkBadge() : ''}`;
 }
 
 function svg(inner, { bg = false } = {}) {
@@ -79,28 +110,28 @@ function svg(inner, { bg = false } = {}) {
 </svg>`;
 }
 
-// Compose the mark (reticle + card), optionally scaled around center.
+// Compose the mark (reticle + ticket card), optionally scaled around center.
 function mark(scale = 1, opts = {}) {
   return `<g transform="translate(512 512) scale(${scale}) translate(-512 -512)">
-    ${reticle(250)}
+    ${reticle(248)}
     ${card(opts)}
   </g>`;
 }
 
-// Monochrome silhouette (white reticle + white rounded card + check), for Android themed icons.
-function monoMark(scale = 0.92) {
-  const w = 300, h = 300, x = 512 - w / 2, y = 512 - h / 2;
+// Monochrome silhouette (white reticle + white ticket), for Android themed icons.
+function monoMark(scale = 0.86) {
+  const w = 300, h = 360, x = 512 - w / 2, y = 512 - h / 2;
   return `<g transform="translate(512 512) scale(${scale}) translate(-512 -512)">
-    ${reticle(250, 34, 104, WHITE)}
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="44" fill="${WHITE}"/>
+    ${reticle(248, 34, 104, WHITE)}
+    <path d="${ticketPath(x, y, w, h, 40, 30)}" fill="${WHITE}"/>
   </g>`;
 }
 
 const files = {
-  'icon-full.svg': svg(mark(0.92), { bg: true }),
-  'foreground.svg': svg(mark(0.82)),
+  'icon-full.svg': svg(mark(1.22), { bg: true }),
+  'foreground.svg': svg(mark(1.06)),
   'background.svg': svg('', { bg: true }),
-  'monochrome.svg': svg(monoMark(0.82)),
+  'monochrome.svg': svg(monoMark(1.06)),
   'splash.svg': svg(mark(1.45)),
 };
 
@@ -122,6 +153,9 @@ render('background.svg', 'assets/android-icon-background.png', 1024);
 render('monochrome.svg', 'assets/android-icon-monochrome.png', 1024);
 render('splash.svg', 'assets/splash-icon.png', 1024);
 render('icon-full.svg', 'assets/favicon.png', 64);
+// Google Play "Hi-res icon" listing asset — must be exactly 512x512.
+mkdirSync('store', { recursive: true });
+render('icon-full.svg', 'store/play-hi-res-icon-512.png', 512);
 // Clean up the temporary SVG working dir.
 rmSync(TMP, { recursive: true, force: true });
 console.log('done');

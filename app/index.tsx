@@ -2,6 +2,7 @@ import { Link, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useConfigStore } from '../src/state/configStore';
+import { FruitcakeLogo } from '../src/ui/FruitcakeLogo';
 import { colors } from '../src/ui/theme';
 import { getDeviceId } from '../src/utils/device';
 
@@ -62,11 +63,24 @@ export default function HomeScreen() {
         <Pressable style={styles.ghostButton} onPress={() => router.push('/settings')}>
           <Text style={styles.ghostButtonText}>⚙️ Settings</Text>
         </Pressable>
+        <Pressable style={styles.ghostButton} onPress={() => router.push('/about')}>
+          <Text style={styles.ghostButtonText}>ℹ️ About</Text>
+        </Pressable>
       </View>
 
       <Text style={styles.deviceId} selectable numberOfLines={1}>
         Device ID: {getDeviceId()}
       </Text>
+
+      <Pressable
+        style={styles.credit}
+        onPress={() => router.push('/about')}
+        hitSlop={8}
+      >
+        <Text style={styles.creditText}>Made with care by</Text>
+        <FruitcakeLogo size={13} color={colors.textMuted} />
+        <Text style={styles.creditText}>Fruitcake</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -123,4 +137,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
     opacity: 0.7,
   },
+  credit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 16,
+    marginBottom: 8,
+    opacity: 0.7,
+  },
+  creditText: { color: colors.textMuted, fontSize: 12 },
 });
