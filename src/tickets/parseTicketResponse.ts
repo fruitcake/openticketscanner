@@ -1,6 +1,31 @@
 import type { ResultStatus, ScanResult } from './types';
 
 /**
+ * Localized fallback messages, used only when the server doesn't supply its own
+ * `message`. Injected by the UI so the popup matches the app language; defaults
+ * to English so this module stays free of any i18n/runtime imports (and its
+ * unit test can call it with no extra arguments).
+ */
+export interface ResultMessages {
+  green: string;
+  yellow: string;
+  red: string;
+  error: string;
+  /** May contain a `{{status}}` placeholder for the HTTP status code. */
+  serverError: string;
+  unexpected: string;
+}
+
+export const DEFAULT_MESSAGES: ResultMessages = {
+  green: 'Valid ticket',
+  yellow: 'Already scanned',
+  red: 'Invalid ticket',
+  error: 'Could not validate ticket',
+  serverError: 'Server error ({{status}})',
+  unexpected: 'Unexpected response from server',
+};
+
+/**
  * ============================================================================
  *  THE ADAPTER — the ONLY place coupled to your server's response shape.
  * ============================================================================
@@ -65,21 +90,21 @@ function pickStatus(body: Json): ResultStatus {
 }
 
 /** Pull a human-readable message. EDIT FOR YOUR API. */
-function pickMessage(body: Json, status: ResultStatus): string {
+function pickMessage(body: Json, status: ResultStatus, messages: ResultMessages): string {
   const candidates = [body.message, body.reason, body.detail, body.title];
   for (const c of candidates) {
     if (typeof c === 'string' && c.trim()) return c.trim();
   }
-  // Sensible fallbacks per status.
+  // Sensible (localized) fallbacks per status.
   switch (status) {
     case 'green':
-      return 'Valid ticket';
+      return messages.green;
     case 'yellow':
-      return 'Already scanned';
+      return messages.yellow;
     case 'red':
-      return 'Invalid ticket';
+      return messages.red;
     default:
-      return 'Could not validate ticket';
+      return messages.error;
   }
 }
 
@@ -106,12 +131,16 @@ function pickTicketFields(body: Json): Record<string, string> {
  * @param body       The parsed JSON body (or any value if parsing failed).
  * @param httpStatus The HTTP status code, if known.
  */
-export function parseTicketResponse(body: unknown, httpStatus?: number): ScanResult {
+export function parseTicketResponse(
+  body: unknown,
+  httpStatus?: number,
+  messages: ResultMessages = DEFAULT_MESSAGES,
+): ScanResult {
   // Server-side / gateway errors are never a valid ticket outcome.
   if (httpStatus != null && httpStatus >= 500) {
     return {
       status: 'error',
-      message: `Server error (${httpStatus})`,
+      message: messages.serverError.replace('{{status}}', String(httpStatus)),
       ticket: {},
       raw: body,
     };
@@ -120,7 +149,7 @@ export function parseTicketResponse(body: unknown, httpStatus?: number): ScanRes
   if (!isObject(body)) {
     return {
       status: 'error',
-      message: 'Unexpected response from server',
+      message: messages.unexpected,
       ticket: {},
       raw: body,
     };
@@ -129,7 +158,7 @@ export function parseTicketResponse(body: unknown, httpStatus?: number): ScanRes
   const status = pickStatus(body);
   return {
     status,
-    message: pickMessage(body, status),
+    message: pickMessage(body, status, messages),
     ticket: pickTicketFields(body),
     raw: body,
   };

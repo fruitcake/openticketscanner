@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CameraScanner } from '../src/camera/CameraScanner';
+import { useT } from '../src/i18n';
 import { parseConfigLink } from '../src/tickets/configLink';
 import { CODE_FORMATS } from '../src/tickets/types';
 import { colors } from '../src/ui/theme';
@@ -27,6 +28,7 @@ function classify(value: string): Kind {
 
 export default function ScanModeScreen() {
   const router = useRouter();
+  const t = useT();
   const [decoded, setDecoded] = useState<Decoded | null>(null);
   const kind = useMemo<Kind>(() => (decoded ? classify(decoded.value) : 'plain'), [decoded]);
 
@@ -57,7 +59,11 @@ export default function ScanModeScreen() {
           <View style={styles.backdrop}>
             <View style={styles.card}>
               <Text style={styles.type}>
-                {kind === 'config' ? 'SETUP LINK' : kind === 'url' ? 'LINK' : decoded.type.toUpperCase()}
+                {kind === 'config'
+                  ? t('scan.setupLink')
+                  : kind === 'url'
+                    ? t('scan.link')
+                    : decoded.type.toUpperCase()}
               </Text>
               <Text selectable style={styles.value}>
                 {decoded.value}
@@ -65,16 +71,16 @@ export default function ScanModeScreen() {
 
               {kind === 'config' && (
                 <>
-                  <Text style={styles.note}>This is an Open Ticket Scanner setup link.</Text>
+                  <Text style={styles.note}>{t('scan.isSetupLink')}</Text>
                   <Pressable style={styles.button} onPress={processConfig}>
-                    <Text style={styles.buttonText}>Process configuration</Text>
+                    <Text style={styles.buttonText}>{t('scan.processConfig')}</Text>
                   </Pressable>
                 </>
               )}
 
               {kind === 'url' && (
                 <Pressable style={styles.button} onPress={openInBrowser}>
-                  <Text style={styles.buttonText}>Open in browser</Text>
+                  <Text style={styles.buttonText}>{t('scan.openInBrowser')}</Text>
                 </Pressable>
               )}
 
@@ -83,7 +89,7 @@ export default function ScanModeScreen() {
                 onPress={reset}
               >
                 <Text style={kind === 'plain' ? styles.buttonText : styles.secondaryText}>
-                  Scan again
+                  {t('common.scanAgain')}
                 </Text>
               </Pressable>
             </View>

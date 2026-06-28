@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import { useT } from '../../../src/i18n';
 import { DEFAULT_DEBOUNCE_MS, useConfigStore } from '../../../src/state/configStore';
 import { CODE_FORMATS, CODE_FORMAT_LABELS, type CodeFormat } from '../../../src/tickets/types';
 import { colors } from '../../../src/ui/theme';
@@ -18,6 +19,7 @@ import { colors } from '../../../src/ui/theme';
 export default function ConfigEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const t = useT();
   const { add, update, remove, get } = useConfigStore();
 
   const isNew = id === 'new' || id == null;
@@ -40,12 +42,14 @@ export default function ConfigEditScreen() {
   const onSave = () => {
     const trimmedName = name.trim();
     const trimmedUrl = apiUrl.trim();
-    if (!trimmedName) return Alert.alert('Missing name', 'Give this configuration a name.');
+    if (!trimmedName) {
+      return Alert.alert(t('configEdit.missingNameTitle'), t('configEdit.missingNameBody'));
+    }
     if (!/^https?:\/\/.+/i.test(trimmedUrl)) {
-      return Alert.alert('Invalid API URL', 'Enter a full http(s) URL to POST scans to.');
+      return Alert.alert(t('configEdit.invalidUrlTitle'), t('configEdit.invalidUrlBody'));
     }
     if (formats.length === 0) {
-      return Alert.alert('No formats', 'Select at least one code format to detect.');
+      return Alert.alert(t('configEdit.noFormatsTitle'), t('configEdit.noFormatsBody'));
     }
     const debounceMs = Number.parseInt(debounce, 10);
 
@@ -65,10 +69,10 @@ export default function ConfigEditScreen() {
   };
 
   const onDelete = () => {
-    Alert.alert('Delete configuration', `Delete "${existing?.name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('configEdit.deleteTitle'), t('configEdit.deleteConfirm', { name: existing?.name ?? '' }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () => {
           remove(id);
@@ -80,19 +84,19 @@ export default function ConfigEditScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Stack.Screen options={{ title: isNew ? 'New Configuration' : 'Edit Configuration' }} />
+      <Stack.Screen options={{ title: isNew ? t('nav.newConfig') : t('nav.editConfig') }} />
 
-      <Field label="Name">
+      <Field label={t('configEdit.name')}>
         <TextInput
           style={styles.input}
           value={name}
           onChangeText={setName}
-          placeholder="Main gate"
+          placeholder={t('configEdit.namePlaceholder')}
           placeholderTextColor={colors.textMuted}
         />
       </Field>
 
-      <Field label="API URL">
+      <Field label={t('configEdit.apiUrl')}>
         <TextInput
           style={styles.input}
           value={apiUrl}
@@ -106,23 +110,23 @@ export default function ConfigEditScreen() {
         />
       </Field>
 
-      <Field label="Scanner name (optional)">
+      <Field label={t('configEdit.scannerName')}>
         <TextInput
           style={styles.input}
           value={scannerName}
           onChangeText={setScannerName}
-          placeholder="Lane 1 / North entrance"
+          placeholder={t('configEdit.scannerPlaceholder')}
           placeholderTextColor={colors.textMuted}
         />
-        <Text style={styles.hint}>Sent with each scan to identify this device/lane.</Text>
+        <Text style={styles.hint}>{t('configEdit.scannerHint')}</Text>
       </Field>
 
-      <Field label="API key (optional)">
+      <Field label={t('configEdit.apiKey')}>
         <TextInput
           style={styles.input}
           value={apiKey}
           onChangeText={setApiKey}
-          placeholder="Sent as Bearer / X-API-Key"
+          placeholder={t('configEdit.apiKeyPlaceholder')}
           placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
           autoCorrect={false}
@@ -130,7 +134,7 @@ export default function ConfigEditScreen() {
         />
       </Field>
 
-      <Field label="Code formats">
+      <Field label={t('configEdit.codeFormats')}>
         <View style={styles.chips}>
           {CODE_FORMATS.map((format) => {
             const selected = formats.includes(format);
@@ -151,10 +155,8 @@ export default function ConfigEditScreen() {
 
       <View style={styles.switchRow}>
         <View style={styles.switchText}>
-          <Text style={styles.switchTitle}>Continuous scanning</Text>
-          <Text style={styles.switchSub}>
-            Keep scanning hands-free, showing a brief result toast for each ticket.
-          </Text>
+          <Text style={styles.switchTitle}>{t('configEdit.continuousTitle')}</Text>
+          <Text style={styles.switchSub}>{t('configEdit.continuousSub')}</Text>
         </View>
         <Switch
           value={continuousMode}
@@ -163,7 +165,7 @@ export default function ConfigEditScreen() {
         />
       </View>
 
-      <Field label="Debounce (ms)">
+      <Field label={t('configEdit.debounce')}>
         <TextInput
           style={styles.input}
           value={debounce}
@@ -173,22 +175,22 @@ export default function ConfigEditScreen() {
           placeholder={String(DEFAULT_DEBOUNCE_MS)}
           placeholderTextColor={colors.textMuted}
         />
-        <Text style={styles.hint}>Ignore the same code if re-scanned within this time.</Text>
+        <Text style={styles.hint}>{t('configEdit.debounceHint')}</Text>
       </Field>
 
       <Pressable style={styles.saveButton} onPress={onSave}>
-        <Text style={styles.saveButtonText}>{isNew ? 'Create configuration' : 'Save changes'}</Text>
+        <Text style={styles.saveButtonText}>{isNew ? t('configEdit.create') : t('configEdit.save')}</Text>
       </Pressable>
 
       {!isNew && (
         <Pressable style={styles.shareButton} onPress={() => router.push(`/share/${id}`)}>
-          <Text style={styles.shareButtonText}>📤 Share / set up another device</Text>
+          <Text style={styles.shareButtonText}>{t('configEdit.share')}</Text>
         </Pressable>
       )}
 
       {!isNew && (
         <Pressable style={styles.deleteButton} onPress={onDelete}>
-          <Text style={styles.deleteButtonText}>Delete configuration</Text>
+          <Text style={styles.deleteButtonText}>{t('configEdit.delete')}</Text>
         </Pressable>
       )}
     </ScrollView>

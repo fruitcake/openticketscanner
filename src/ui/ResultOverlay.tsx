@@ -1,8 +1,9 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { getLocale, useT } from '../i18n';
 import type { ScanRecord, ScanResult } from '../tickets/types';
 import { formatTimestamp } from '../utils/format';
-import { STATUS_COLORS, STATUS_LABELS } from './theme';
+import { STATUS_COLORS } from './theme';
 
 interface ResultOverlayProps {
   result: ScanResult;
@@ -17,6 +18,7 @@ interface ResultOverlayProps {
  * non-continuous mode. Tap "Continue" to scan the next ticket.
  */
 export function ResultOverlay({ result, code, previous, onContinue }: ResultOverlayProps) {
+  const t = useT();
   const color = STATUS_COLORS[result.status];
   const fields = Object.entries(result.ticket);
 
@@ -24,7 +26,7 @@ export function ResultOverlay({ result, code, previous, onContinue }: ResultOver
     <View style={styles.backdrop}>
       <View style={[styles.card, { borderColor: color }]}>
         <View style={[styles.banner, { backgroundColor: color }]}>
-          <Text style={styles.bannerText}>{STATUS_LABELS[result.status]}</Text>
+          <Text style={styles.bannerText}>{t(`status.${result.status}`)}</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.body}>
@@ -43,8 +45,8 @@ export function ResultOverlay({ result, code, previous, onContinue }: ResultOver
 
           {previous && (
             <View style={styles.previous}>
-              <Text style={styles.previousLabel}>Previously scanned</Text>
-              <Text style={styles.previousValue}>{formatTimestamp(previous.scannedAt)}</Text>
+              <Text style={styles.previousLabel}>{t('result.previouslyScanned')}</Text>
+              <Text style={styles.previousValue}>{formatTimestamp(previous.scannedAt, getLocale())}</Text>
             </View>
           )}
 
@@ -54,7 +56,7 @@ export function ResultOverlay({ result, code, previous, onContinue }: ResultOver
         </ScrollView>
 
         <Pressable style={[styles.continue, { backgroundColor: color }]} onPress={onContinue}>
-          <Text style={styles.continueText}>Continue scanning</Text>
+          <Text style={styles.continueText}>{t('common.continueScanning')}</Text>
         </Pressable>
       </View>
     </View>

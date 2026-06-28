@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { getLocale } from '../i18n';
 import type { ScanRecord } from '../tickets/types';
 import { formatTime } from '../utils/format';
 import { STATUS_COLORS } from './theme';
@@ -17,7 +18,7 @@ export function HistoryRow({ record }: { record: ScanRecord }) {
           {record.code}
         </Text>
       </View>
-      <Text style={styles.time}>{formatTime(record.scannedAt)}</Text>
+      <Text style={styles.time}>{formatTime(record.scannedAt, getLocale())}</Text>
     </View>
   );
 }

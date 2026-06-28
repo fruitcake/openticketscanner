@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { CameraScanner } from '../src/camera/CameraScanner';
+import { useT } from '../src/i18n';
 import { parseConfigLink } from '../src/tickets/configLink';
 
 /**
@@ -11,6 +12,7 @@ import { parseConfigLink } from '../src/tickets/configLink';
  */
 export default function ConfigureScanScreen() {
   const router = useRouter();
+  const t = useT();
   const [rejected, setRejected] = useState(false);
   const handled = useRef(false);
   const rejectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -32,11 +34,11 @@ export default function ConfigureScanScreen() {
 
   return (
     <View style={styles.fill}>
-      <Stack.Screen options={{ headerShown: true, title: 'Scan setup code' }} />
+      <Stack.Screen options={{ headerShown: true, title: t('nav.scanSetupCode') }} />
       <CameraScanner formats={['qr']} active={!handled.current} onScan={onScan}>
         <View pointerEvents="none" style={styles.hintWrap}>
           <Text style={styles.hint}>
-            {rejected ? 'Not a setup code — try again' : 'Point at a configuration QR code'}
+            {rejected ? t('configureScan.rejected') : t('configureScan.hint')}
           </Text>
         </View>
       </CameraScanner>

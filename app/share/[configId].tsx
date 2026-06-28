@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
+import { useT } from '../../src/i18n';
 import { useConfigStore } from '../../src/state/configStore';
 import { buildConfigLink } from '../../src/tickets/configLink';
 import { colors } from '../../src/ui/theme';
@@ -16,6 +17,7 @@ import { colors } from '../../src/ui/theme';
 export default function ShareConfigScreen() {
   const { configId } = useLocalSearchParams<{ configId: string }>();
   const router = useRouter();
+  const t = useT();
   const config = useConfigStore((s) => (configId ? s.get(configId) : undefined));
   const [includeKey, setIncludeKey] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -28,10 +30,10 @@ export default function ShareConfigScreen() {
   if (!config) {
     return (
       <View style={styles.centered}>
-        <Stack.Screen options={{ title: 'Share' }} />
-        <Text style={styles.missing}>This configuration no longer exists.</Text>
+        <Stack.Screen options={{ title: t('nav.share') }} />
+        <Text style={styles.missing}>{t('share.missing')}</Text>
         <Pressable style={styles.secondary} onPress={() => router.back()}>
-          <Text style={styles.secondaryText}>Go back</Text>
+          <Text style={styles.secondaryText}>{t('common.goBack')}</Text>
         </Pressable>
       </View>
     );
@@ -48,24 +50,20 @@ export default function ShareConfigScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen options={{ title: `Share “${config.name}”` }} />
+      <Stack.Screen options={{ title: t('nav.shareNamed', { name: config.name }) }} />
 
       <View style={styles.qrCard}>
         <QRCode value={link} size={240} backgroundColor="#ffffff" color="#000000" />
       </View>
 
-      <Text style={styles.caption}>
-        Scan this with another device (Ticket configurations → Scan setup code), or share the link.
-      </Text>
+      <Text style={styles.caption}>{t('share.caption')}</Text>
 
       {hasKey && (
         <View style={styles.toggleRow}>
           <View style={styles.toggleText}>
-            <Text style={styles.toggleTitle}>Include API key</Text>
+            <Text style={styles.toggleTitle}>{t('share.includeKey')}</Text>
             <Text style={[styles.toggleSub, includeKey && styles.warn]}>
-              {includeKey
-                ? '⚠ The QR/link contains your API key — share it only with trusted devices.'
-                : 'The key is omitted; enter it on each device after importing.'}
+              {includeKey ? t('share.keyWarn') : t('share.keyOmitted')}
             </Text>
           </View>
           <Switch
@@ -82,10 +80,10 @@ export default function ShareConfigScreen() {
 
       <View style={styles.actions}>
         <Pressable style={[styles.action, styles.primary]} onPress={onShare}>
-          <Text style={styles.primaryText}>Share link</Text>
+          <Text style={styles.primaryText}>{t('share.shareLink')}</Text>
         </Pressable>
         <Pressable style={[styles.action, styles.secondary]} onPress={onCopy}>
-          <Text style={styles.secondaryText}>{copied ? 'Copied!' : 'Copy link'}</Text>
+          <Text style={styles.secondaryText}>{copied ? t('share.copied') : t('share.copyLink')}</Text>
         </Pressable>
       </View>
     </View>

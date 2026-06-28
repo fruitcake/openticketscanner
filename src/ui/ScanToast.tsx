@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useT } from '../i18n';
 import type { ScanResult } from '../tickets/types';
-import { STATUS_COLORS, STATUS_LABELS } from './theme';
+import { STATUS_COLORS } from './theme';
 
 interface ScanToastProps {
   result: ScanResult;
@@ -13,6 +14,7 @@ interface ScanToastProps {
  * scanning underneath; the parent auto-dismisses this after a short delay.
  */
 export function ScanToast({ result, code }: ScanToastProps) {
+  const t = useT();
   const color = STATUS_COLORS[result.status];
   const primary = Object.values(result.ticket)[0];
 
@@ -20,7 +22,7 @@ export function ScanToast({ result, code }: ScanToastProps) {
     <View pointerEvents="none" style={styles.wrap}>
       <View style={[styles.toast, { borderLeftColor: color }]}>
         <View style={[styles.badge, { backgroundColor: color }]}>
-          <Text style={styles.badgeText}>{STATUS_LABELS[result.status]}</Text>
+          <Text style={styles.badgeText}>{t(`status.${result.status}`)}</Text>
         </View>
         <View style={styles.text}>
           <Text style={styles.message} numberOfLines={1}>

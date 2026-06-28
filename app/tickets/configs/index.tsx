@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useT } from '../../../src/i18n';
 import { useConfigStore } from '../../../src/state/configStore';
 import { colors } from '../../../src/ui/theme';
 
 export default function ConfigListScreen() {
   const router = useRouter();
+  const t = useT();
   const configs = useConfigStore((s) => s.configs);
 
   return (
@@ -14,9 +16,7 @@ export default function ConfigListScreen() {
         data={configs}
         keyExtractor={(c) => c.id}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No configurations yet. Add one below.</Text>
-        }
+        ListEmptyComponent={<Text style={styles.empty}>{t('configList.empty')}</Text>}
         renderItem={({ item }) => (
           <View style={styles.row}>
             <Pressable
@@ -28,15 +28,15 @@ export default function ConfigListScreen() {
                 {item.apiUrl}
               </Text>
               <Text style={styles.meta}>
-                {item.formats.length} format{item.formats.length === 1 ? '' : 's'} ·{' '}
-                {item.continuousMode ? 'continuous' : 'stop on each'} · {item.debounceMs}ms
+                {t('home.formatCount', { count: item.formats.length })} ·{' '}
+                {item.continuousMode ? t('home.continuous') : t('home.stopOnEach')} · {item.debounceMs}ms
               </Text>
             </Pressable>
             <Pressable
               style={styles.shareButton}
               onPress={() => router.push(`/share/${item.id}`)}
               hitSlop={8}
-              accessibilityLabel={`Share ${item.name}`}
+              accessibilityLabel={t('configList.shareA11y', { name: item.name })}
             >
               <Text style={styles.shareIcon}>📤</Text>
             </Pressable>
@@ -46,10 +46,10 @@ export default function ConfigListScreen() {
 
       <View style={styles.footer}>
         <Pressable style={styles.scanButton} onPress={() => router.push('/configure-scan')}>
-          <Text style={styles.scanButtonText}>⛶ Scan setup code</Text>
+          <Text style={styles.scanButtonText}>{t('configList.scanSetup')}</Text>
         </Pressable>
         <Pressable style={styles.addButton} onPress={() => router.push('/tickets/configs/new')}>
-          <Text style={styles.addButtonText}>+ Add configuration</Text>
+          <Text style={styles.addButtonText}>{t('configList.addConfig')}</Text>
         </Pressable>
       </View>
     </View>

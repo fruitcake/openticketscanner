@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useT } from '../src/i18n';
 import { FruitcakeLogo } from '../src/ui/FruitcakeLogo';
 import { colors } from '../src/ui/theme';
 import { getAppVersion } from '../src/utils/device';
@@ -9,35 +10,28 @@ const GITHUB_URL = 'https://github.com/fruitcake/openticketscanner';
 const FRUITCAKE_URL = 'https://fruitcake.nl';
 
 export default function AboutScreen() {
+  const t = useT();
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Image source={require('../assets/icon.png')} style={styles.logo} />
         <Text style={styles.appName}>Open Ticket Scanner</Text>
-        <Text style={styles.version}>Version {getAppVersion()}</Text>
+        <Text style={styles.version}>{t('about.version', { version: getAppVersion() })}</Text>
       </View>
 
-      <Text style={styles.body}>
-        A fast, no-nonsense scanner for QR codes, barcodes and event tickets. Point your camera at a
-        code to decode it, or validate tickets against your own API.
-      </Text>
+      <Text style={styles.body}>{t('about.intro')}</Text>
 
-      <Text style={styles.section}>Open source</Text>
-      <Text style={styles.body}>
-        Open Ticket Scanner is free and open source. Browse the code, report an issue, or contribute
-        on GitHub.
-      </Text>
+      <Text style={styles.section}>{t('about.openSourceSection')}</Text>
+      <Text style={styles.body}>{t('about.openSourceBody')}</Text>
       <LinkRow
         icon={<Text style={styles.rowIcon}>🐙</Text>}
-        title="View on GitHub"
+        title={t('about.viewOnGitHub')}
         subtitle="github.com/fruitcake/openticketscanner"
         url={GITHUB_URL}
       />
 
-      <Text style={styles.section}>Developed by</Text>
-      <Text style={styles.body}>
-        Built and maintained by Fruitcake, a development agency from the Netherlands.
-      </Text>
+      <Text style={styles.section}>{t('about.developedBySection')}</Text>
+      <Text style={styles.body}>{t('about.developedByBody')}</Text>
       <LinkRow
         icon={<FruitcakeLogo size={26} />}
         title="Fruitcake"
@@ -46,7 +40,7 @@ export default function AboutScreen() {
       />
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Made with care by</Text>
+        <Text style={styles.footerText}>{t('about.madeWith')}</Text>
         <FruitcakeLogo size={14} color={colors.textMuted} />
         <Text style={styles.footerText}>Fruitcake</Text>
       </View>

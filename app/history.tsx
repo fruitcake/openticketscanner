@@ -2,6 +2,7 @@ import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useT } from '../src/i18n';
 import { useConfigStore } from '../src/state/configStore';
 import { clearHistory, listScans } from '../src/storage/history';
 import type { ScanRecord } from '../src/tickets/types';
@@ -10,6 +11,7 @@ import { colors } from '../src/ui/theme';
 
 export default function HistoryScreen() {
   const { configId } = useLocalSearchParams<{ configId?: string }>();
+  const t = useT();
   const config = useConfigStore((s) => (configId ? s.get(configId) : undefined));
   const [scans, setScans] = useState<ScanRecord[]>([]);
 
@@ -25,16 +27,16 @@ export default function HistoryScreen() {
     }, [refresh]),
   );
 
-  const scopeLabel = config ? `“${config.name}”` : 'all configurations';
+  const scopeLabel = config ? `“${config.name}”` : t('history.scopeAll');
 
   const onClear = () => {
     Alert.alert(
-      'Clear history',
-      `Delete scan history for ${scopeLabel}? This cannot be undone.`,
+      t('history.clearTitle'),
+      t('history.clearConfirm', { scope: scopeLabel }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Clear',
+          text: t('history.clearAction'),
           style: 'destructive',
           onPress: () => {
             clearHistory(configId);
@@ -47,16 +49,18 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen options={{ title: config ? `History · ${config.name}` : 'Scan History' }} />
+      <Stack.Screen
+        options={{ title: config ? t('nav.historyNamed', { name: config.name }) : t('nav.history') }}
+      />
       <FlatList
         data={scans}
         keyExtractor={(s) => s.id}
         renderItem={({ item }) => <HistoryRow record={item} />}
-        ListEmptyComponent={<Text style={styles.empty}>No scans yet.</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>{t('history.empty')}</Text>}
       />
       {scans.length > 0 && (
         <Pressable style={styles.clear} onPress={onClear}>
-          <Text style={styles.clearText}>Clear history ({scans.length})</Text>
+          <Text style={styles.clearText}>{t('history.clearButton', { count: scans.length })}</Text>
         </Pressable>
       )}
     </View>

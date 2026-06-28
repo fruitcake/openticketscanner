@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import { CameraScanner } from '../../../src/camera/CameraScanner';
+import { t as translate, useT } from '../../../src/i18n';
 import { playScanFeedback } from '../../../src/feedback/feedback';
 import { useConfigStore } from '../../../src/state/configStore';
 import { postTicket } from '../../../src/tickets/api';
@@ -30,6 +31,7 @@ const TOAST_MS = 2500;
 export default function TicketScanScreen() {
   const { configId } = useLocalSearchParams<{ configId: string }>();
   const router = useRouter();
+  const t = useT();
   const config = useConfigStore((s) => (configId ? s.get(configId) : undefined));
 
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -66,12 +68,20 @@ export default function TicketScanScreen() {
       let scanResult: ScanResult;
       try {
         const res = await postTicket(config, scanned, type);
-        scanResult = parseTicketResponse(res.body, res.httpStatus);
+        // Localized fallbacks for when the server returns no message of its own.
+        scanResult = parseTicketResponse(res.body, res.httpStatus, {
+          green: translate('result.fallback.green'),
+          yellow: translate('result.fallback.yellow'),
+          red: translate('result.fallback.red'),
+          error: translate('result.fallback.error'),
+          serverError: translate('result.fallback.serverError'),
+          unexpected: translate('result.fallback.unexpected'),
+        });
       } catch (e) {
         const message =
           e instanceof Error && e.name === 'AbortError'
-            ? 'Server timed out'
-            : 'Network error — could not reach server';
+            ? translate('ticketScan.timeout')
+            : translate('ticketScan.networkError');
         scanResult = errorResult(message, e);
       }
 
@@ -121,10 +131,10 @@ export default function TicketScanScreen() {
   if (!config) {
     return (
       <View style={styles.missing}>
-        <Stack.Screen options={{ headerShown: true, title: 'Not found' }} />
-        <Text style={styles.missingText}>This configuration no longer exists.</Text>
+        <Stack.Screen options={{ headerShown: true, title: t('nav.notFound') }} />
+        <Text style={styles.missingText}>{t('ticketScan.missing')}</Text>
         <Pressable style={styles.missingButton} onPress={() => router.back()}>
-          <Text style={styles.missingButtonText}>Go back</Text>
+          <Text style={styles.missingButtonText}>{t('common.goBack')}</Text>
         </Pressable>
       </View>
     );
@@ -151,7 +161,7 @@ export default function TicketScanScreen() {
         {busy && !result && (
           <View style={styles.loading}>
             <ActivityIndicator color="#fff" size="large" />
-            <Text style={styles.loadingText}>Validating…</Text>
+            <Text style={styles.loadingText}>{t('ticketScan.validating')}</Text>
           </View>
         )}
 
@@ -169,13 +179,13 @@ export default function TicketScanScreen() {
         {cameraActive && !result && !busy && (
           <View style={styles.actionRow}>
             <Pressable style={styles.actionPill} onPress={() => setManualOpen(true)}>
-              <Text style={styles.actionPillText}>⌨  Manual</Text>
+              <Text style={styles.actionPillText}>{t('ticketScan.manual')}</Text>
             </Pressable>
             <Pressable
               style={styles.actionPill}
               onPress={() => router.push({ pathname: '/history', params: { configId: config.id } })}
             >
-              <Text style={styles.actionPillText}>📜  History</Text>
+              <Text style={styles.actionPillText}>{t('ticketScan.history')}</Text>
             </Pressable>
           </View>
         )}
@@ -192,12 +202,12 @@ export default function TicketScanScreen() {
           style={styles.manualBackdrop}
         >
           <View style={styles.manualCard}>
-            <Text style={styles.manualTitle}>Enter ticket code</Text>
+            <Text style={styles.manualTitle}>{t('ticketScan.enterCode')}</Text>
             <TextInput
               style={styles.manualInput}
               value={manualCode}
               onChangeText={setManualCode}
-              placeholder="Type or paste the code"
+              placeholder={t('ticketScan.codePlaceholder')}
               placeholderTextColor={colors.textMuted}
               autoFocus
               autoCapitalize="characters"
@@ -213,10 +223,10 @@ export default function TicketScanScreen() {
                   setManualCode('');
                 }}
               >
-                <Text style={styles.manualCancelText}>Cancel</Text>
+                <Text style={styles.manualCancelText}>{t('common.cancel')}</Text>
               </Pressable>
               <Pressable style={[styles.manualAction, styles.manualSubmit]} onPress={submitManual}>
-                <Text style={styles.manualSubmitText}>Validate</Text>
+                <Text style={styles.manualSubmitText}>{t('ticketScan.validate')}</Text>
               </Pressable>
             </View>
           </View>

@@ -2,6 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useT } from '../src/i18n';
 import { useConfigStore } from '../src/state/configStore';
 import { parseConfigLink, payloadFromParams } from '../src/tickets/configLink';
 import { CODE_FORMAT_LABELS, type CodeFormat } from '../src/tickets/types';
@@ -16,6 +17,7 @@ import { colors } from '../src/ui/theme';
 export default function ConfigureScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const t = useT();
   const { configs, add, update } = useConfigStore();
 
   const payload = useMemo(() => {
@@ -32,13 +34,11 @@ export default function ConfigureScreen() {
   if (!payload) {
     return (
       <View style={styles.centered}>
-        <Stack.Screen options={{ title: 'Setup' }} />
-        <Text style={styles.errorTitle}>Invalid setup code</Text>
-        <Text style={styles.errorBody}>
-          This link or QR code doesn’t contain a valid configuration.
-        </Text>
+        <Stack.Screen options={{ title: t('nav.setup') }} />
+        <Text style={styles.errorTitle}>{t('configure.invalidTitle')}</Text>
+        <Text style={styles.errorBody}>{t('configure.invalidBody')}</Text>
         <Pressable style={styles.secondary} onPress={() => router.replace('/')}>
-          <Text style={styles.secondaryText}>Go home</Text>
+          <Text style={styles.secondaryText}>{t('common.goHome')}</Text>
         </Pressable>
       </View>
     );
@@ -55,44 +55,51 @@ export default function ConfigureScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Stack.Screen options={{ title: duplicate ? 'Update configuration' : 'Add configuration' }} />
+      <Stack.Screen
+        options={{ title: duplicate ? t('nav.updateConfig') : t('nav.addConfig') }}
+      />
 
       <Text style={styles.lead}>
-        {duplicate
-          ? 'A configuration with this API URL already exists.'
-          : 'Review this configuration before adding it.'}
+        {duplicate ? t('configure.duplicateLead') : t('configure.reviewLead')}
       </Text>
 
       <View style={styles.card}>
-        <Row label="Name" value={payload.name} />
-        <Row label="API URL" value={payload.apiUrl} />
-        <Row label="Scanner name" value={payload.scannerName ?? '—'} />
+        <Row label={t('configure.name')} value={payload.name} />
+        <Row label={t('configure.apiUrl')} value={payload.apiUrl} />
+        <Row label={t('configure.scannerName')} value={payload.scannerName ?? t('configure.dash')} />
         <Row
-          label="Formats"
+          label={t('configure.formats')}
           value={payload.formats.map((f) => CODE_FORMAT_LABELS[f as CodeFormat] ?? f).join(', ')}
         />
-        <Row label="Continuous" value={payload.continuousMode ? 'On' : 'Off'} />
-        <Row label="Debounce" value={`${payload.debounceMs} ms`} />
-        <Row label="API key" value={payload.apiKey ? '•••••••• (included)' : 'not included'} last />
+        <Row
+          label={t('configure.continuous')}
+          value={payload.continuousMode ? t('configure.on') : t('configure.off')}
+        />
+        <Row label={t('configure.debounce')} value={t('configure.debounceValue', { ms: payload.debounceMs })} />
+        <Row
+          label={t('configure.apiKey')}
+          value={payload.apiKey ? t('configure.keyIncluded') : t('configure.keyNotIncluded')}
+          last
+        />
       </View>
 
       {duplicate ? (
         <>
           <Pressable style={styles.primary} onPress={onUpdate}>
-            <Text style={styles.primaryText}>Update “{duplicate.name}”</Text>
+            <Text style={styles.primaryText}>{t('configure.updateNamed', { name: duplicate.name })}</Text>
           </Pressable>
           <Pressable style={styles.secondary} onPress={onAddNew}>
-            <Text style={styles.secondaryText}>Add as new instead</Text>
+            <Text style={styles.secondaryText}>{t('configure.addAsNew')}</Text>
           </Pressable>
         </>
       ) : (
         <Pressable style={styles.primary} onPress={onAddNew}>
-          <Text style={styles.primaryText}>Add configuration</Text>
+          <Text style={styles.primaryText}>{t('configure.addConfig')}</Text>
         </Pressable>
       )}
 
       <Pressable style={styles.ghost} onPress={() => router.replace('/')}>
-        <Text style={styles.ghostText}>Cancel</Text>
+        <Text style={styles.ghostText}>{t('common.cancel')}</Text>
       </Pressable>
     </ScrollView>
   );
