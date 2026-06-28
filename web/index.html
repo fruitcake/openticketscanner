@@ -3,266 +3,72 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Open Ticket Scanner — Scan & validate tickets against your own API</title>
-    <meta
-      name="description"
-      content="Open Ticket Scanner is a free, open-source app that scans QR codes and barcodes and validates event tickets against your own backend. Built by Fruitcake."
-    />
-    <meta property="og:title" content="Open Ticket Scanner" />
-    <meta
-      property="og:description"
-      content="Scan & validate tickets against your own API. Free and open source."
-    />
-    <meta property="og:image" content="/assets/feature.png" />
-    <meta property="og:type" content="website" />
+    <title>Get Open Ticket Scanner</title>
+    <meta name="description" content="Download Open Ticket Scanner for iOS and Android." />
     <link rel="icon" href="/assets/icon.png" />
+    <link rel="canonical" href="https://openticketscanner.com/" />
     <style>
-      :root {
-        color-scheme: dark;
-        --bg: #0b0f14;
-        --surface: #161b22;
-        --surface-alt: #1f2630;
-        --text: #e6edf3;
-        --muted: #9aa7b4;
-        --border: #2a323c;
-        --green: #22c55e;
-        --green-soft: #34d399;
-      }
+      :root { color-scheme: dark; }
       * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; }
       body {
         margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-      }
-      a { color: var(--green-soft); }
-      .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
-
-      /* nav */
-      header.nav {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        backdrop-filter: blur(10px);
-        background: rgba(11, 15, 20, 0.72);
-        border-bottom: 1px solid var(--border);
-      }
-      .nav-inner { display: flex; align-items: center; gap: 12px; height: 64px; }
-      .nav-inner img { width: 34px; height: 34px; border-radius: 9px; }
-      .nav-inner strong { font-size: 17px; }
-      .nav-links { margin-left: auto; display: flex; gap: 22px; font-size: 15px; }
-      .nav-links a { color: var(--muted); text-decoration: none; }
-      .nav-links a:hover { color: var(--text); }
-
-      /* hero */
-      .hero {
-        text-align: center;
-        padding: 84px 24px 64px;
         background:
           radial-gradient(900px 520px at 50% -8%, rgba(34, 197, 94, 0.16), transparent 70%),
-          radial-gradient(700px 400px at 50% 0%, rgba(16, 48, 36, 0.6), transparent 75%);
+          #0b0f14;
+        color: #e6edf3;
+        text-align: center;
       }
-      .hero img.app-icon {
-        width: 116px;
-        height: 116px;
-        border-radius: 26px;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
-      }
-      .hero h1 { font-size: clamp(34px, 6vw, 56px); margin: 26px 0 10px; letter-spacing: -0.02em; }
-      .hero p.tag { font-size: clamp(17px, 2.6vw, 22px); color: var(--muted); margin: 0 auto; max-width: 620px; }
-      .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
-      .btn {
+      .card { max-width: 420px; width: 100%; }
+      img.icon { width: 104px; height: 104px; border-radius: 24px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5); }
+      h1 { font-size: 24px; margin: 22px 0 8px; }
+      p { color: #9aa7b4; font-size: 15px; line-height: 1.5; margin: 0 0 24px; }
+      .btns { display: flex; flex-direction: column; gap: 12px; }
+      a.btn {
+        display: block;
         text-decoration: none;
         font-weight: 700;
-        padding: 13px 22px;
+        padding: 14px;
         border-radius: 12px;
         font-size: 15px;
-        border: 1px solid transparent;
       }
-      .btn.primary { background: var(--green); color: #04120a; }
-      .btn.ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
-
-      /* sections */
-      section { padding: 72px 0; border-top: 1px solid var(--border); }
-      h2 { font-size: clamp(26px, 4vw, 36px); margin: 0 0 8px; letter-spacing: -0.01em; }
-      .lead { color: var(--muted); margin: 0 0 40px; max-width: 640px; }
-
-      .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
-      .feature {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 24px;
-      }
-      .feature .ico { font-size: 28px; }
-      .feature h3 { margin: 12px 0 6px; font-size: 18px; }
-      .feature p { margin: 0; color: var(--muted); font-size: 15px; }
-
-      /* screenshots */
-      .shots { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x mandatory; }
-      .shots img {
-        height: 560px;
-        border-radius: 22px;
-        border: 1px solid var(--border);
-        scroll-snap-align: center;
-        flex: 0 0 auto;
-      }
-
-      /* about */
-      .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-      .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 26px;
-      }
-      .card h3 { margin: 0 0 8px; font-size: 19px; }
-      .card p { margin: 0 0 16px; color: var(--muted); font-size: 15px; }
-      .inline-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; text-decoration: none; }
-      .inline-link:hover { text-decoration: underline; }
-      .fc-mark { width: 15px; height: 16px; flex: 0 0 auto; }
-
-      footer {
-        border-top: 1px solid var(--border);
-        padding: 36px 24px;
-        text-align: center;
-        color: var(--muted);
-        font-size: 14px;
-      }
-      footer a { color: var(--muted); }
+      a.ios { background: #22c55e; color: #04120a; }
+      a.android { background: #161b22; color: #e6edf3; border: 1px solid #2a323c; }
+      .more { margin-top: 22px; font-size: 13px; }
+      .more a { color: #34d399; text-decoration: none; }
     </style>
   </head>
   <body>
-    <header class="nav">
-      <div class="wrap nav-inner">
-        <img src="/assets/icon.png" alt="Open Ticket Scanner icon" />
-        <strong>Open Ticket Scanner</strong>
-        <nav class="nav-links">
-          <a href="#features">Features</a>
-          <a href="#screens">Screens</a>
-          <a href="#about">About</a>
-          <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>
-        </nav>
+    <div class="card">
+      <img class="icon" src="/assets/icon.png" alt="Open Ticket Scanner" />
+      <h1>Open Ticket Scanner</h1>
+      <p id="msg">Get the app for your device.</p>
+      <div class="btns">
+        <a class="btn ios" id="ios" href="https://apps.apple.com/app/id6784664554">Download on the App Store</a>
+        <a class="btn android" id="android" href="https://play.google.com/store/apps/details?id=nl.fruitcake.openticketscanner">Get it on Google Play</a>
       </div>
-    </header>
+      <p class="more"><a href="https://openticketscanner.com/">About Open Ticket Scanner →</a></p>
+    </div>
 
-    <main>
-      <section class="hero" style="border-top: 0">
-        <img class="app-icon" src="/assets/icon.png" alt="Open Ticket Scanner" />
-        <h1>Validate tickets in a tap</h1>
-        <p class="tag">
-          Scan any QR code or barcode and check it against your own backend — green, yellow or red,
-          instantly. Free and open source.
-        </p>
-        <div class="cta">
-          <a class="btn primary" href="https://github.com/fruitcake/openticketscanner">View on GitHub</a>
-          <a class="btn ghost" href="#about">About the app</a>
-        </div>
-      </section>
-
-      <section id="features">
-        <div class="wrap">
-          <h2>What it does</h2>
-          <p class="lead">A fast, no-nonsense scanner for events, venues and access control.</p>
-          <div class="features">
-            <div class="feature">
-              <div class="ico">⚡</div>
-              <h3>Instant validation</h3>
-              <p>Point the camera at a ticket and get a clear valid / warning / rejected result with a buzz and a beep.</p>
-            </div>
-            <div class="feature">
-              <div class="ico">🔌</div>
-              <h3>Bring your own backend</h3>
-              <p>Connect any API. One adapter maps your server's JSON to the app — your data never leaves your stack.</p>
-            </div>
-            <div class="feature">
-              <div class="ico">🔁</div>
-              <h3>Catch duplicates</h3>
-              <p>See the moment a ticket was first scanned, so the same code can't get in twice.</p>
-            </div>
-            <div class="feature">
-              <div class="ico">📲</div>
-              <h3>Provision in one scan</h3>
-              <p>Share a setup QR to configure every device at the door in seconds.</p>
-            </div>
-            <div class="feature">
-              <div class="ico">📜</div>
-              <h3>On-device history</h3>
-              <p>Every scan is logged locally so you always have an audit trail you can trust.</p>
-            </div>
-            <div class="feature">
-              <div class="ico">🔓</div>
-              <h3>Open source</h3>
-              <p>No lock-in, no tracking. Read the code, file an issue, or run your own build.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="screens">
-        <div class="wrap">
-          <h2>See it in action</h2>
-          <p class="lead">Designed for dim venues — high-contrast, dark, and readable at a glance.</p>
-          <div class="shots">
-            <img src="/assets/screens/01-validate.png" alt="Valid ticket result" loading="lazy" />
-            <img src="/assets/screens/02-duplicates.png" alt="Duplicate ticket detection" loading="lazy" />
-            <img src="/assets/screens/03-configure.png" alt="Connect to your own API" loading="lazy" />
-            <img src="/assets/screens/05-history.png" alt="On-device scan history" loading="lazy" />
-          </div>
-        </div>
-      </section>
-
-      <section id="about">
-        <div class="wrap">
-          <h2>About</h2>
-          <p class="lead">
-            Open Ticket Scanner is a free, open-source ticket and barcode scanner. It connects to
-            your own validation API, so you stay in control of your tickets and your data.
-          </p>
-          <div class="about-grid">
-            <div class="card">
-              <h3>Built by Fruitcake</h3>
-              <p>
-                Developed by Fruitcake — a development agency from the Netherlands that
-                builds web and mobile products, and maintains popular open-source packages.
-              </p>
-              <a class="inline-link" href="https://fruitcake.nl" rel="nofollow">
-                <svg class="fc-mark" viewBox="0 0 184 202" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path fill="#6AE28F" d="M141.233801,60.5132093 C141.233801,67.5727854 135.565153,73.7964096 128.572089,74.413787 L57.9602532,80.6501933 L57.9602532,62.0202236 C57.9602532,54.9606475 63.6289017,48.7370233 70.6219653,48.1196459 L141.233801,41.8832396 L141.233801,60.5132093 Z M104.611065,110.65499 C104.611065,117.714566 98.9424167,123.93819 91.9493532,124.555568 L73.688632,126.168674 L73.688632,144.603077 C73.688632,151.662653 68.0199835,157.886277 61.0269199,158.503654 L42.7661987,160.11676 L42.7661987,110.465814 C42.7661987,103.406238 48.4348472,97.1826138 55.4279108,96.5652364 L104.611065,92.2205868 L104.611065,110.65499 Z M37.9851363,12.8959015 C17.0072117,14.7480336 0,33.4189062 0,54.5963565 L0,202 L146.014864,189.104099 C166.994055,187.250688 184,168.581094 184,147.402365 L184,0 L37.9851363,12.8959015 Z"/>
-                </svg>
-                fruitcake.nl →
-              </a>
-            </div>
-            <div class="card">
-              <h3>Open source</h3>
-              <p>
-                The app is open source under a permissive license. Browse the code, report an issue,
-                or contribute improvements — everything happens in the open on GitHub.
-              </p>
-              <a class="inline-link" href="https://github.com/fruitcake/openticketscanner">🐙 View on GitHub →</a>
-            </div>
-            <div class="card">
-              <h3>Privacy first</h3>
-              <p>
-                Scans are validated against the backend you configure and logged on the device. No
-                third-party tracking, no analytics SDKs, no hidden data sharing.
-              </p>
-              <a class="inline-link" href="#features">What it does →</a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <p>
-        Open Ticket Scanner — built with care by
-        <a href="https://fruitcake.nl">Fruitcake</a> ·
-        <a href="https://github.com/fruitcake/openticketscanner">Open source on GitHub</a>
-      </p>
-    </footer>
+    <script>
+      // Send phones straight to their store; everyone else sees both options.
+      (function () {
+        var ua = navigator.userAgent || '';
+        var ios = document.getElementById('ios').href;
+        var android = document.getElementById('android').href;
+        if (/iPhone|iPad|iPod/i.test(ua)) {
+          document.getElementById('msg').textContent = 'Opening the App Store…';
+          location.replace(ios);
+        } else if (/Android/i.test(ua)) {
+          document.getElementById('msg').textContent = 'Opening Google Play…';
+          location.replace(android);
+        }
+      })();
+    </script>
   </body>
 </html>
