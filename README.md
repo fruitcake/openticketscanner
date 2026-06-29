@@ -1,6 +1,33 @@
+<div align="center">
+
+<img src="assets/icon.png" alt="Open Ticket Scanner" width="112" height="112" />
+
 # Open Ticket Scanner
 
-[![Fruitcake](https://img.shields.io/badge/Powered%20By-Fruitcake-b2bc35.svg)](https://fruitcake.nl)
+<strong>Scan &amp; validate event tickets against your own API.</strong><br />
+Fast, open source, and built for the door — iOS &amp; Android.
+
+<p>
+  <a href="https://apps.apple.com/app/id6784664554"><img alt="Download on the App Store" src="https://img.shields.io/badge/Download_on_the-App_Store-0D96F6?style=for-the-badge&logo=apple&logoColor=white" /></a>
+  <a href="https://play.google.com/store/apps/details?id=nl.fruitcake.openticketscanner"><img alt="Get it on Google Play" src="https://img.shields.io/badge/Get_it_on-Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white" /></a>
+</p>
+
+<p>
+  <a href="https://openticketscanner.com"><img alt="Website" src="https://img.shields.io/badge/Website-openticketscanner.com-34d399?style=flat-square" /></a>
+  <a href="https://fruitcake.nl"><img alt="Made by Fruitcake" src="https://img.shields.io/badge/Made_by-Fruitcake-6AE28F?style=flat-square" /></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" /></a>
+</p>
+
+<p>
+  <img src="store/screenshots/01-validate.png" alt="Instant valid / warning / rejected results" width="23%" />
+  <img src="store/screenshots/02-duplicates.png" alt="Catch duplicate scans" width="23%" />
+  <img src="store/screenshots/03-configure.png" alt="Connect your own API" width="23%" />
+  <img src="store/screenshots/05-history.png" alt="On-device scan history" width="23%" />
+</p>
+
+</div>
+
+---
 
 An open-source QR / barcode **ticket scanner** built with Expo + React Native. Two modes:
 
@@ -9,6 +36,8 @@ An open-source QR / barcode **ticket scanner** built with Expo + React Native. T
   - **Manual entry** — type a code when a QR/barcode can't be read.
   - **Per-scan metadata** — a stable device ID, optional scanner/lane name, and the app version are sent with every scan (see [Ticket API contract](#ticket-api-contract)).
   - **Feedback** — optional haptic buzz and/or beep on each result, toggled in **Settings**.
+
+**Available in 7 languages** — English, Dutch, French, German, Spanish, Portuguese and Italian. The app follows the device language automatically, with a manual override in **Settings**.
 
 ## Tech
 
@@ -224,7 +253,7 @@ app/                       expo-router screens
   index.tsx                home (mode picker + config list)
   scan.tsx                 generic scan mode
   history.tsx              scan history
-  settings.tsx             haptics/sound toggles + device info
+  settings.tsx             language + haptics/sound toggles + device info
   configure.tsx            import-config confirmation (deeplink + QR target)
   configure-scan.tsx       scan a provisioning QR code
   share/[configId].tsx     share a config via QR + link
@@ -239,6 +268,7 @@ src/
   storage/                 mmkv (configs) + sqlite (history)
   state/                   zustand config + settings stores
   ui/                      result popup, toast, history row, theme
+  i18n/                    i18n-js setup + 7 locale catalogs (en, nl, fr, de, es, pt, it)
   utils/                   device id, app version, id, formatting
 web/                       universal-link hosting templates (AASA, assetlinks, fallback)
 ```
@@ -246,3 +276,11 @@ web/                       universal-link hosting templates (AASA, assetlinks, f
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+<div align="center">
+  <a href="https://fruitcake.nl"><img src="assets/icon.png" alt="" width="40" height="40" /></a><br />
+  <sub>Built with care by <a href="https://fruitcake.nl"><strong>Fruitcake</strong></a> · <a href="https://openticketscanner.com">openticketscanner.com</a><br />
+  Need a ticketing backend or a custom build? <a href="https://fruitcake.nl">Get in touch.</a></sub>
+</div>
