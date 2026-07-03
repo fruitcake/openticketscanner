@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo — Open Ticket Scanner</title>
+    <meta name="description" content="Try Open Ticket Scanner without a server: scan the setup QR to load a demo configuration, then scan the sample ticket QR to see a live validation result." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://openticketscanner.com/demo.html" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .doc h2 { scroll-margin-top: 84px; }
+      .step { display: grid; gap: 24px; align-items: start; margin: 8px 0 32px; grid-template-columns: 1fr; }
+      @media (min-width: 720px) { .step { grid-template-columns: 260px 1fr; } }
+      .qrcard {
+        background: #fff; border-radius: 16px; padding: 18px; width: 240px; max-width: 100%;
+        aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      }
+      .qrcard svg { width: 100%; height: 100%; display: block; }
+      .qrcap { color: var(--muted); font-size: 13px; margin: 10px 2px 0; text-align: center; width: 240px; max-width: 100%; }
+      .qrcap code { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+      .settings { width: 100%; }
+      .settings th, .settings td { text-align: left; vertical-align: top; }
+      .linkbox {
+        width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+        color: var(--muted); padding: 12px 14px; font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+        font-size: 12px; word-break: break-all; margin-top: 14px; white-space: pre-wrap;
+      }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+      .doc pre {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+        padding: 16px 18px; overflow: auto; font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+        font-size: 13px; line-height: 1.55; color: #dbe4ee;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="./">
+          <img src="img/icon.png" alt="" />
+          <span>Open Ticket Scanner</span>
+        </a>
+        <span class="spacer"></span>
+        <a class="navlink" href="./">Home</a>
+        <a class="navlink" href="setup.html">Set up</a>
+        <a class="navlink" href="demo.html">Demo</a>
+        <a class="navlink" href="api.html">API</a>
+        <a class="navlink" href="privacy.html">Privacy</a>
+        <a class="navlink" href="support.html">Support</a>
+      </div>
+    </header>
+
+    <main class="doc">
+      <a class="back" href="./">← Back to home</a>
+      <h1>Try the demo</h1>
+      <p class="updated">See the app work end to end — no server or account needed.</p>
+
+      <div class="tldr">
+        <strong>Two steps:</strong> ① In the app, tap <em>Scan setup code</em> and scan
+        the first QR to load the demo configuration. ② Start scanning and point at the
+        sample ticket QR below. The demo endpoint returns a “valid” result for
+        <em>any</em> code, so you can also scan any other QR you like.
+      </div>
+
+      <h2 id="step1">1 · Load the demo configuration</h2>
+      <p>Open <strong>Open Ticket Scanner</strong> → <em>Scan setup code</em> and point it
+        at this QR — or, on the device itself, just open the link.</p>
+
+      <div class="step">
+        <div>
+          <div class="qrcard" id="setupqr" aria-label="Setup QR code for the demo configuration"></div>
+          <p class="qrcap">Scan with <em>Scan setup code</em></p>
+        </div>
+        <div>
+          <table class="settings">
+            <tbody>
+              <tr><th>Name</th><td>Demo</td></tr>
+              <tr><th>API URL</th><td><code>openticketscanner.com/demo.json</code></td></tr>
+              <tr><th>Method</th><td>GET <span style="color:var(--muted)">— scan details sent as query parameters</span></td></tr>
+              <tr><th>Code format</th><td>QR Code</td></tr>
+            </tbody>
+          </table>
+          <div class="linkbox" id="setuplink" aria-live="polite"></div>
+          <div class="actions">
+            <button type="button" class="btn" id="copy">Copy link</button>
+            <a class="btn ghost" id="openapp" href="#">Open in app</a>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="step2">2 · Scan a sample ticket</h2>
+      <p>With the demo configuration open, scan this ticket QR. Because the demo endpoint
+        is a fixed sample, every scan comes back as a valid ticket.</p>
+
+      <div class="step">
+        <div>
+          <div class="qrcard" id="ticketqr" aria-label="Sample ticket QR code"></div>
+          <p class="qrcap">Encodes <code>DEMO-TICKET-0001</code></p>
+        </div>
+        <div>
+          <p>You should see a <strong>green “valid”</strong> result with a sample ticket:
+            holder, ticket type and gate. Try scanning it a few times, or point the camera
+            at any other QR code — the demo returns the same sample response.</p>
+          <h3 style="margin-bottom:8px">What the endpoint returns</h3>
+          <p style="margin-top:0">The configuration points at
+            <a href="demo.json"><code>demo.json</code></a>, a static file that always replies:</p>
+          <pre id="demojson">loading…</pre>
+        </div>
+      </div>
+
+      <p class="note">Ready to use it for real? Build your own configuration on the
+        <a href="setup.html">Set up</a> page and connect it to your validation server —
+        see the <a href="api.html">API contract</a> for the request and response shape.</p>
+
+      <p style="margin-top:40px"><a class="back" href="./">← Back to home</a></p>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>© <span id="yr">2026</span> <a href="https://fruitcake.nl">Fruitcake</a>. MIT licensed.</div>
+        <div class="links">
+          <a href="./">Home</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="support.html">Support</a>
+          <a href="demo.html">Demo</a>
+          <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="vendor/qrcode.min.js"></script>
+    <script>
+      document.getElementById('yr').textContent = new Date().getFullYear();
+
+      // ---- demo configuration — mirrors the payload format in src/tickets/configLink.ts ----
+      var HOST = 'app.openticketscanner.com', PATH = 'configure', SCHEME = 'openticketscanner';
+      var DEMO = {
+        v: '1', name: 'Demo',
+        endpoint: 'https://openticketscanner.com/demo.json',
+        formats: 'qr', continuous: '0', debounce: '3000', method: 'get'
+      };
+      var TICKET_CODE = 'DEMO-TICKET-0001';
+
+      function buildQuery() {
+        return [
+          ['v', DEMO.v], ['name', DEMO.name], ['endpoint', DEMO.endpoint],
+          ['formats', DEMO.formats], ['continuous', DEMO.continuous],
+          ['debounce', DEMO.debounce], ['method', DEMO.method]
+        ].map(function (p) { return p[0] + '=' + encodeURIComponent(p[1]); }).join('&');
+      }
+      var query = buildQuery();
+      var httpsLink = 'https://' + HOST + '/' + PATH + '?' + query;
+      var schemeLink = SCHEME + '://' + PATH + '?' + query;
+
+      function renderQR(elId, text) {
+        try {
+          var qr = qrcode(0, 'M');
+          qr.addData(text);
+          qr.make();
+          document.getElementById(elId).innerHTML = qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+        } catch (e) {
+          document.getElementById(elId).textContent = 'QR error';
+        }
+      }
+
+      renderQR('setupqr', httpsLink);
+      renderQR('ticketqr', TICKET_CODE);
+      document.getElementById('setuplink').textContent = httpsLink;
+      document.getElementById('openapp').href = schemeLink;
+
+      document.getElementById('copy').addEventListener('click', function () {
+        var btn = this;
+        navigator.clipboard.writeText(httpsLink).then(function () {
+          var t = btn.textContent; btn.textContent = 'Copied!';
+          setTimeout(function () { btn.textContent = t; }, 1400);
+        });
+      });
+
+      // Show the actual demo.json the app receives (best-effort; static fallback if blocked).
+      var fallback = '{\n  "status": "valid",\n  "message": "Demo ticket accepted",\n  "ticket": { "Holder": "Demo Attendee", "Type": "VIP", "Gate": "Main entrance" }\n}';
+      fetch('demo.json').then(function (r) { return r.text(); })
+        .then(function (t) { document.getElementById('demojson').textContent = t.trim(); })
+        .catch(function () { document.getElementById('demojson').textContent = fallback; });
+    </script>
+  </body>
+</html>

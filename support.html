@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Support — Open Ticket Scanner</title>
+    <meta name="description" content="Help, troubleshooting tips, and how to get support for the Open Ticket Scanner app." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://openticketscanner.com/support.html" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="./">
+          <img src="img/icon.png" alt="" />
+          <span>Open Ticket Scanner</span>
+        </a>
+        <span class="spacer"></span>
+        <a class="navlink" href="./">Home</a>
+        <a class="navlink" href="setup.html">Set up</a>
+        <a class="navlink" href="demo.html">Demo</a>
+        <a class="navlink" href="api.html">API</a>
+        <a class="navlink" href="privacy.html">Privacy</a>
+        <a class="navlink" href="support.html">Support</a>
+      </div>
+    </header>
+
+    <main class="doc">
+      <a class="back" href="./">← Back to home</a>
+      <h1>Support</h1>
+
+      <div class="tldr">
+        <strong>Need a hand?</strong> Most questions are answered by the tips below.
+        For anything else — bug reports, feature requests, or questions — open an
+        issue on <a href="https://github.com/fruitcake/openticketscanner/issues">GitHub</a>
+        and we'll help you out.
+      </div>
+
+      <p>
+        <strong>Open Ticket Scanner</strong> turns a phone or tablet into a ticket
+        checker: point it at a QR code or barcode and it sends the code to the
+        validation server <em>you</em> configure, then shows a green / amber / red
+        result. It's free and open source, published by
+        <a href="https://fruitcake.nl">Fruitcake</a>.
+      </p>
+
+      <h2 id="start">Getting started</h2>
+      <ol>
+        <li>Open the app and add a configuration — either type your validation
+          server's details in <em>Ticket configs → New</em>, or generate a setup
+          code on the <a href="setup.html">Set up</a> page and scan it with
+          <em>Scan setup code</em>.</li>
+        <li>Grant camera access when prompted — it's needed to read codes.</li>
+        <li>Open the configuration and start scanning. Each scan is sent to your
+          server and the result is shown and saved to history.</li>
+      </ol>
+      <p class="note">Just want to see how it works without a server? The
+        <a href="demo.html">demo page</a> has a ready-made configuration and a sample
+        ticket QR — load it, scan the ticket, and you'll get a “valid” result.</p>
+
+      <h2 id="tips">Troubleshooting</h2>
+
+      <h3>The camera won't scan a code</h3>
+      <ul>
+        <li>Make sure camera access is granted: in your device Settings, find Open
+          Ticket Scanner and enable the camera, then reopen the app.</li>
+        <li>Give the code room in the frame and hold steady for a moment — good
+          lighting helps. Use the in-app flashlight/torch button in dim venues.</li>
+        <li>Check that the code's format is enabled for that configuration
+          (QR, Code 128, EAN-13, etc.) under the configuration's <em>Code formats</em>.</li>
+      </ul>
+
+      <h3>Scans show an error or “could not validate”</h3>
+      <ul>
+        <li>Confirm the <strong>API URL</strong> is correct and reachable from the
+          device's network, and that the server responds with JSON.</li>
+        <li>If your server needs authentication, set the <strong>API key</strong> on
+          the configuration — it's sent as a <code>Bearer</code> token and
+          <code>X-API-Key</code> header.</li>
+        <li>Check the request method matches your server: <strong>POST</strong>
+          (a JSON body) or <strong>GET</strong> (scan details as query parameters).</li>
+        <li>See the <a href="api.html">API page</a> for the exact request and the
+          response shape the app expects.</li>
+      </ul>
+
+      <h3>A setup code won't import</h3>
+      <ul>
+        <li>Use <em>Scan setup code</em> for setup QR codes — a normal ticket code
+          scanned there is ignored on purpose.</li>
+        <li>You can also paste a setup link or your API URL into the importer on the
+          <a href="setup.html">Set up</a> page to rebuild the configuration.</li>
+      </ul>
+
+      <h3>Where is my data stored?</h3>
+      <p>
+        Configurations and scan history live <strong>only on your device</strong> —
+        there are no accounts and nothing is uploaded to us. Scan requests go solely
+        to the server you configure. Full details are in the
+        <a href="privacy.html">Privacy Policy</a>.
+      </p>
+
+      <h2 id="issues">Report a bug or request a feature</h2>
+      <p>
+        The project is open source. The best way to report a problem or suggest an
+        improvement is to open an issue — it's public, tracked, and lets others chip
+        in:
+      </p>
+      <p>
+        <a class="btn" href="https://github.com/fruitcake/openticketscanner/issues">Open an issue on GitHub →</a>
+      </p>
+      <p class="note">When reporting a scanning or validation problem, it helps to
+        include your device and OS version, the app version (shown on the app's
+        <em>About</em> screen), the code format, and what you expected to happen.</p>
+
+      <h2 id="contact">Contact</h2>
+      <p>
+        All support runs through GitHub, so questions and answers stay public and
+        searchable for the next person. Open an
+        <a href="https://github.com/fruitcake/openticketscanner/issues">issue on GitHub</a>
+        — you'll need a free GitHub account — and we'll get back to you there.
+      </p>
+
+      <p style="margin-top:40px"><a class="back" href="./">← Back to home</a></p>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>© <span id="yr">2026</span> <a href="https://fruitcake.nl">Fruitcake</a>. MIT licensed.</div>
+        <div class="links">
+          <a href="./">Home</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="support.html">Support</a>
+          <a href="demo.html">Demo</a>
+          <a href="https://github.com/fruitcake/openticketscanner">GitHub</a>
+        </div>
+      </div>
+    </footer>
+    <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  </body>
+</html>

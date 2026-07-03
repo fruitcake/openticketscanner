@@ -1,0 +1,10 @@
+{
+  "status": "valid",
+  "message": "Demo ticket accepted — this is a sample response",
+  "ticket": {
+    "Holder": "Demo Attendee",
+    "Type": "VIP",
+    "Gate": "Main entrance",
+    "Note": "Static demo endpoint — every scan returns this sample ticket"
+  }
+}
