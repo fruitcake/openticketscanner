@@ -96,6 +96,8 @@
     "scannerHint": "Enviado em cada leitura para identificar este dispositivo/pista.",
     "apiKey": "Chave de API (opcional)",
     "apiKeyPlaceholder": "Enviada como Bearer / X-API-Key",
+    "requestMethod": "Método de requisição",
+    "requestMethodHint": "GET envia os dados do scan como parâmetros de URL; POST num corpo JSON. A maioria dos servidores usa POST.",
     "codeFormats": "Formatos de código",
     "continuousTitle": "Leitura contínua",
     "continuousSub": "Leia em modo mãos-livres com um aviso breve por bilhete.",

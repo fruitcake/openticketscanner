@@ -96,6 +96,8 @@
     "scannerHint": "Se envía en cada escaneo para identificar este dispositivo/carril.",
     "apiKey": "Clave de API (opcional)",
     "apiKeyPlaceholder": "Se envía como Bearer / X-API-Key",
+    "requestMethod": "Método de solicitud",
+    "requestMethodHint": "GET envía los datos del escaneo como parámetros de URL; POST en un cuerpo JSON. La mayoría de los servidores usan POST.",
     "codeFormats": "Formatos de código",
     "continuousTitle": "Escaneo continuo",
     "continuousSub": "Escanea con manos libres y un aviso breve por cada entrada.",

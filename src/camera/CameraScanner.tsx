@@ -59,7 +59,7 @@ export function CameraScanner({
         </Text>
         <Pressable style={styles.permButton} onPress={requestPermission}>
           <Text style={styles.permButtonText}>
-            {permission.canAskAgain ? 'Grant permission' : 'Open settings'}
+            {permission.canAskAgain ? 'Continue' : 'Open settings'}
           </Text>
         </Pressable>
       </View>

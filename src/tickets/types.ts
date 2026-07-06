@@ -21,6 +21,14 @@ export const CODE_FORMATS = [
 
 export type CodeFormat = (typeof CODE_FORMATS)[number];
 
+/**
+ * HTTP method used to send a scan to the validation endpoint.
+ * - `POST` (default): scan fields go in a JSON request body.
+ * - `GET`: scan fields are appended as query parameters, so the endpoint can be
+ *   a plain static host (e.g. a fixed JSON file) — handy for demos/testing.
+ */
+export type HttpMethod = 'POST' | 'GET';
+
 /** Human-readable labels for each format, used in the config UI. */
 export const CODE_FORMAT_LABELS: Record<CodeFormat, string> = {
   qr: 'QR Code',
@@ -44,6 +52,8 @@ export interface TicketConfig {
   name: string;
   apiUrl: string;
   apiKey?: string;
+  /** HTTP method for the validation request. Defaults to `POST` when unset. */
+  method?: HttpMethod;
   /** Optional label sent with each scan to identify this scanner/lane. */
   scannerName?: string;
   /** Which code formats this config scans for. */

@@ -96,6 +96,8 @@
     "scannerHint": "Sent with each scan to identify this device/lane.",
     "apiKey": "API key (optional)",
     "apiKeyPlaceholder": "Sent as Bearer / X-API-Key",
+    "requestMethod": "Request method",
+    "requestMethodHint": "GET sends scan data as URL query parameters; POST sends a JSON body. Most servers use POST.",
     "codeFormats": "Code formats",
     "continuousTitle": "Continuous scanning",
     "continuousSub": "Keep scanning hands-free, showing a brief result toast for each ticket.",

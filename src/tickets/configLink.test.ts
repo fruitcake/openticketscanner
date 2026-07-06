@@ -73,6 +73,25 @@ test('coerces continuous and debounce', () => {
   assert.equal(b?.debounceMs, 3000); // fallback
 });
 
+test('method: defaults to undefined (POST) and is absent from POST links', () => {
+  const link = buildConfigLink(base, { includeKey: true });
+  assert.doesNotMatch(link, /method=/);
+  assert.equal(parseConfigLink(link)?.method, undefined);
+});
+
+test('method: round-trips GET', () => {
+  const cfg: ConfigPayload = { ...base, method: 'GET' };
+  const link = buildConfigLink(cfg, { includeKey: true });
+  assert.match(link, /method=get/);
+  assert.deepEqual(parseConfigLink(link), cfg);
+});
+
+test('method: parses case-insensitively, ignores non-GET values', () => {
+  assert.equal(parseConfigLink('configure?endpoint=https://x.com/v&method=GET')?.method, 'GET');
+  assert.equal(parseConfigLink('configure?endpoint=https://x.com/v&method=post')?.method, undefined);
+  assert.equal(parseConfigLink('configure?endpoint=https://x.com/v&method=junk')?.method, undefined);
+});
+
 test('name falls back to endpoint host', () => {
   assert.equal(parseConfigLink('configure?endpoint=https://tickets.acme.io/v')?.name, 'tickets.acme.io');
 });

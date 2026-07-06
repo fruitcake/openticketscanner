@@ -96,6 +96,8 @@
     "scannerHint": "Envoyé à chaque scan pour identifier cet appareil / cette voie.",
     "apiKey": "Clé d’API (facultatif)",
     "apiKeyPlaceholder": "Envoyée en Bearer / X-API-Key",
+    "requestMethod": "Méthode de requête",
+    "requestMethodHint": "GET envoie les données de scan en paramètres d’URL ; POST dans un corps JSON. La plupart des serveurs utilisent POST.",
     "codeFormats": "Formats de code",
     "continuousTitle": "Scan en continu",
     "continuousSub": "Scannez en mains libres avec une brève notification par billet.",

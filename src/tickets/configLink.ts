@@ -1,4 +1,4 @@
-import type { CodeFormat } from './types';
+import type { CodeFormat, HttpMethod } from './types';
 
 /**
  * Allowed formats, inlined so this module stays free of runtime local imports
@@ -42,6 +42,8 @@ export interface ConfigPayload {
   name: string;
   apiUrl: string;
   apiKey?: string;
+  /** Omitted (undefined) means the default, `POST`. */
+  method?: HttpMethod;
   scannerName?: string;
   formats: CodeFormat[];
   continuousMode: boolean;
@@ -65,6 +67,8 @@ export function buildConfigLink(config: ConfigPayload, options: BuildOptions): s
     ['continuous', config.continuousMode ? '1' : '0'],
     ['debounce', String(config.debounceMs)],
   ];
+  // Only emit `method` for the non-default GET, so POST links stay compact.
+  if (config.method === 'GET') params.push(['method', 'get']);
   if (config.scannerName) params.push(['scanner', config.scannerName]);
   if (options.includeKey && config.apiKey) params.push(['key', config.apiKey]);
 
@@ -144,11 +148,14 @@ export function payloadFromParams(
 
   const debounce = Number.parseInt(get('debounce') ?? '', 10);
   const continuous = get('continuous');
+  const isGet = get('method')?.trim().toUpperCase() === 'GET';
 
   return {
     name: get('name')?.trim() || hostOf(apiUrl),
     apiUrl,
     apiKey: get('key')?.trim() || undefined,
+    // Only carry `method` when it's the non-default GET (keeps POST payloads clean).
+    ...(isGet ? { method: 'GET' as const } : {}),
     scannerName: get('scanner')?.trim() || undefined,
     formats: coerceFormats(get('formats')),
     continuousMode: continuous === '1' || continuous === 'true',

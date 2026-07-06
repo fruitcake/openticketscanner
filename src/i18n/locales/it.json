@@ -96,6 +96,8 @@
     "scannerHint": "Inviato a ogni scansione per identificare questo dispositivo/corsia.",
     "apiKey": "Chiave API (facoltativo)",
     "apiKeyPlaceholder": "Inviata come Bearer / X-API-Key",
+    "requestMethod": "Metodo di richiesta",
+    "requestMethodHint": "GET invia i dati della scansione come parametri URL; POST in un corpo JSON. La maggior parte dei server usa POST.",
     "codeFormats": "Formati di codice",
     "continuousTitle": "Scansione continua",
     "continuousSub": "Scansiona a mani libere con un breve avviso per ogni biglietto.",

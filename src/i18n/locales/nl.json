@@ -96,6 +96,8 @@
     "scannerHint": "Wordt bij elke scan meegestuurd om dit apparaat/deze baan te herkennen.",
     "apiKey": "API-sleutel (optioneel)",
     "apiKeyPlaceholder": "Verzonden als Bearer / X-API-Key",
+    "requestMethod": "Aanvraagmethode",
+    "requestMethodHint": "GET verstuurt scangegevens als URL-parameters; POST als JSON-body. De meeste servers gebruiken POST.",
     "codeFormats": "Codeformaten",
     "continuousTitle": "Doorlopend scannen",
     "continuousSub": "Scan handsfree door met een korte resultaatmelding per ticket.",

@@ -13,7 +13,12 @@ import {
 
 import { useT } from '../../../src/i18n';
 import { DEFAULT_DEBOUNCE_MS, useConfigStore } from '../../../src/state/configStore';
-import { CODE_FORMATS, CODE_FORMAT_LABELS, type CodeFormat } from '../../../src/tickets/types';
+import {
+  CODE_FORMATS,
+  CODE_FORMAT_LABELS,
+  type CodeFormat,
+  type HttpMethod,
+} from '../../../src/tickets/types';
 import { colors } from '../../../src/ui/theme';
 
 export default function ConfigEditScreen() {
@@ -28,6 +33,7 @@ export default function ConfigEditScreen() {
   const [name, setName] = useState(existing?.name ?? '');
   const [apiUrl, setApiUrl] = useState(existing?.apiUrl ?? '');
   const [apiKey, setApiKey] = useState(existing?.apiKey ?? '');
+  const [method, setMethod] = useState<HttpMethod>(existing?.method ?? 'POST');
   const [scannerName, setScannerName] = useState(existing?.scannerName ?? '');
   const [formats, setFormats] = useState<CodeFormat[]>(existing?.formats ?? ['qr']);
   const [continuousMode, setContinuousMode] = useState(existing?.continuousMode ?? false);
@@ -57,6 +63,7 @@ export default function ConfigEditScreen() {
       name: trimmedName,
       apiUrl: trimmedUrl,
       apiKey: apiKey.trim() || undefined,
+      method: method === 'GET' ? ('GET' as const) : undefined,
       scannerName: scannerName.trim() || undefined,
       formats,
       continuousMode,
@@ -108,6 +115,24 @@ export default function ConfigEditScreen() {
           keyboardType="url"
           inputMode="url"
         />
+      </Field>
+
+      <Field label={t('configEdit.requestMethod')}>
+        <View style={styles.chips}>
+          {(['POST', 'GET'] as const).map((m) => {
+            const selected = method === m;
+            return (
+              <Pressable
+                key={m}
+                style={[styles.chip, selected && styles.chipOn]}
+                onPress={() => setMethod(m)}
+              >
+                <Text style={[styles.chipText, selected && styles.chipTextOn]}>{m}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={styles.hint}>{t('configEdit.requestMethodHint')}</Text>
       </Field>
 
       <Field label={t('configEdit.scannerName')}>

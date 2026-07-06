@@ -2,7 +2,7 @@
   "expo": {
     "name": "Open Ticket Scanner",
     "slug": "openticketscanner",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "openticketscanner",
@@ -20,7 +20,7 @@
     },
     "android": {
       "package": "nl.fruitcake.openticketscanner",
-      "versionCode": 10100,
+      "versionCode": 10200,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -46,11 +46,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -65,7 +61,14 @@
           "cameraPermission": "Open Ticket Scanner uses the camera to scan tickets and barcodes."
         }
       ],
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
+      ],
       [
         "expo-splash-screen",
         {
