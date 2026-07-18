@@ -214,6 +214,7 @@ You don't need the app to build a link — a backend can generate per-device lin
 | `debounce`   | no       | Debounce window in ms. Default `3000`.                                       |
 | `scanner`    | no       | Scanner/lane label sent with every scan.                                    |
 | `key`        | no       | API key (**secret** — include only for trusted shares).                     |
+| `skipConfirm`| no       | `true` to add/update the config immediately, skipping the confirmation screen (app **and** web). |
 
 Valid `formats` values: `qr`, `ean13`, `ean8`, `code128`, `code39`, `code93`, `codabar`, `itf14`, `upc_a`, `upc_e`, `pdf417`, `aztec`, `datamatrix`.
 

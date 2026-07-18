@@ -5,6 +5,8 @@ import {
   buildConfigLink,
   type ConfigPayload,
   parseConfigLink,
+  skipConfirmFromLink,
+  skipConfirmFromParams,
 } from './configLink.ts';
 
 const base: ConfigPayload = {
@@ -98,6 +100,29 @@ test('name falls back to endpoint host', () => {
 
 test('accepts a bare query string', () => {
   assert.equal(parseConfigLink('?endpoint=https://x.com/v')?.apiUrl, 'https://x.com/v');
+});
+
+test('skipConfirm: emitted only when requested, and not part of the payload', () => {
+  const withSkip = buildConfigLink(base, { includeKey: true, skipConfirm: true });
+  assert.match(withSkip, /skipConfirm=true/);
+  // Directive, not config data — round-trip payload is unchanged.
+  assert.deepEqual(parseConfigLink(withSkip), base);
+  assert.equal(skipConfirmFromLink(withSkip), true);
+
+  const noSkip = buildConfigLink(base, { includeKey: true });
+  assert.doesNotMatch(noSkip, /skipConfirm/);
+  assert.equal(skipConfirmFromLink(noSkip), false);
+});
+
+test('skipConfirm: parses true/1, ignores everything else', () => {
+  assert.equal(skipConfirmFromParams({ skipConfirm: 'true' }), true);
+  assert.equal(skipConfirmFromParams({ skipConfirm: '1' }), true);
+  assert.equal(skipConfirmFromParams({ skipConfirm: 'TRUE' }), true);
+  assert.equal(skipConfirmFromParams({ skipConfirm: 'false' }), false);
+  assert.equal(skipConfirmFromParams({ skipConfirm: '0' }), false);
+  assert.equal(skipConfirmFromParams({}), false);
+  assert.equal(skipConfirmFromLink('configure?endpoint=https://x.com/v&skipConfirm=1'), true);
+  assert.equal(skipConfirmFromLink('TICKET-ABC-123'), false);
 });
 
 test('rejects non-configure / invalid inputs', () => {

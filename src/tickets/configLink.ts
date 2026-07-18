@@ -55,6 +55,8 @@ interface BuildOptions {
   includeKey: boolean;
   /** `'https'` → universal link; `'scheme'` → custom-scheme fallback. */
   base?: 'https' | 'scheme';
+  /** Add `skipConfirm=true` so the importer adds the config without a prompt. */
+  skipConfirm?: boolean;
 }
 
 /** Build a shareable provisioning URL for a config. */
@@ -71,6 +73,7 @@ export function buildConfigLink(config: ConfigPayload, options: BuildOptions): s
   if (config.method === 'GET') params.push(['method', 'get']);
   if (config.scannerName) params.push(['scanner', config.scannerName]);
   if (options.includeKey && config.apiKey) params.push(['key', config.apiKey]);
+  if (options.skipConfirm) params.push(['skipConfirm', 'true']);
 
   const query = params
     .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
@@ -172,4 +175,25 @@ export function parseConfigLink(input: string): ConfigPayload | null {
   const query = extractQuery(input);
   if (query == null) return null;
   return payloadFromParams(parseQuery(query));
+}
+
+/**
+ * Whether a provisioning payload asked to skip the import-confirmation screen
+ * and add the config immediately (`skipConfirm=true` or `1`). This is a
+ * directive, not configuration data, so it lives outside {@link ConfigPayload}
+ * and is read separately by whichever screen consumes the link.
+ */
+export function skipConfirmFromParams(
+  params: Record<string, string | string[] | undefined>,
+): boolean {
+  const raw = params.skipConfirm;
+  const value = (Array.isArray(raw) ? raw[0] : raw)?.trim().toLowerCase();
+  return value === 'true' || value === '1';
+}
+
+/** Same as {@link skipConfirmFromParams}, but from a raw link / scheme / bare query. */
+export function skipConfirmFromLink(input: string): boolean {
+  const query = extractQuery(input);
+  if (query == null) return false;
+  return skipConfirmFromParams(parseQuery(query));
 }

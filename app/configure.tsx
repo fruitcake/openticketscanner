@@ -1,10 +1,15 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useT } from '../src/i18n';
 import { useConfigStore } from '../src/state/configStore';
-import { parseConfigLink, payloadFromParams } from '../src/tickets/configLink';
+import {
+  parseConfigLink,
+  payloadFromParams,
+  skipConfirmFromLink,
+  skipConfirmFromParams,
+} from '../src/tickets/configLink';
 import { CODE_FORMAT_LABELS, type CodeFormat } from '../src/tickets/types';
 import { colors } from '../src/ui/theme';
 
@@ -31,6 +36,26 @@ export default function ConfigureScreen() {
     [configs, payload],
   );
 
+  // `skipConfirm=true` on the link adds the config immediately, no confirmation.
+  const skipConfirm = useMemo(() => {
+    const link = params.link;
+    return typeof link === 'string' ? skipConfirmFromLink(link) : skipConfirmFromParams(params);
+  }, [params]);
+
+  const didAutoAdd = useRef(false);
+  useEffect(() => {
+    if (!payload || !skipConfirm || didAutoAdd.current) return;
+    didAutoAdd.current = true;
+    let id: string;
+    if (duplicate) {
+      update(duplicate.id, payload);
+      id = duplicate.id;
+    } else {
+      id = add(payload).id;
+    }
+    router.replace(`/tickets/${id}/scan`);
+  }, [payload, skipConfirm, duplicate, add, update, router]);
+
   if (!payload) {
     return (
       <View style={styles.centered}>
@@ -40,6 +65,16 @@ export default function ConfigureScreen() {
         <Pressable style={styles.secondary} onPress={() => router.replace('/')}>
           <Text style={styles.secondaryText}>{t('common.goHome')}</Text>
         </Pressable>
+      </View>
+    );
+  }
+
+  // skipConfirm path: the effect above is adding the config and navigating away.
+  if (skipConfirm) {
+    return (
+      <View style={styles.centered}>
+        <Stack.Screen options={{ title: t('nav.setup') }} />
+        <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
   }

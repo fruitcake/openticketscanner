@@ -8,7 +8,13 @@
  * (?endpoint=...) contract is the reused `payloadFromParams`.
  */
 import { DEFAULT_MESSAGES, errorResult, parseTicketResponse } from '../tickets/parseTicketResponse.js';
-import { payloadFromParams } from '../tickets/configLink.js';
+import {
+  parseConfigLink,
+  payloadFromParams,
+  skipConfirmFromLink,
+  skipConfirmFromParams,
+  type ConfigPayload,
+} from '../tickets/configLink.js';
 import { CODE_FORMATS, CODE_FORMAT_LABELS } from '../tickets/types.js';
 import type { CodeFormat, ScanRecord, ScanResult, TicketConfig } from '../tickets/types.js';
 import { formatTime, formatTimestamp } from '../utils/format.js';
@@ -83,10 +89,18 @@ function hostOf(url: string): string {
 type View =
   | { name: 'list' }
   | { name: 'form'; editingId?: string }
-  | { name: 'scan'; configId: string };
+  | { name: 'scan'; configId: string }
+  | { name: 'import'; payload: ConfigPayload } // confirm a config from a link/QR
+  | { name: 'setup' } // scan a provisioning QR to add a config
+  | { name: 'quick' }; // decode any code, no validation
 
 let view: View = { name: 'list' };
 let configs: TicketConfig[] = loadConfigs();
+
+/** Views that hold the camera open (so we release it on the way out). */
+function isCameraView(v: View): boolean {
+  return v.name === 'scan' || v.name === 'setup' || v.name === 'quick';
+}
 
 /** Query string captured at load, used for the "Open in app" deeplink. */
 const pendingSearch = location.search;
@@ -94,14 +108,24 @@ const pendingSearch = location.search;
 const root = document.getElementById('app') as HTMLElement;
 
 function setView(next: View): void {
-  // Leaving the scanner view: always release the camera.
-  if (view.name === 'scan' && next.name !== 'scan') stopScanner();
+  // Leaving a camera view: always release the camera (the next camera view
+  // re-acquires it in its own render).
+  if (isCameraView(view)) stopScanner();
   view = next;
   render();
 }
 
 function persist(): void {
   saveConfigs(configs);
+}
+
+/** Add a config, or update the existing one with the same endpoint (skipConfirm path). */
+function upsertConfig(payload: ConfigPayload): void {
+  const existing = configs.find((c) => c.apiUrl === payload.apiUrl);
+  configs = existing
+    ? configs.map((c) => (c.id === existing.id ? { ...payload, id: existing.id } : c))
+    : [...configs, { ...payload, id: uid() }];
+  persist();
 }
 
 // -- Store banner (dismissible) ---------------------------------------------
@@ -166,6 +190,14 @@ function renderList(): HTMLElement {
 
   const container = el('div', { class: 'screen' }, header);
 
+  // Camera entry points that don't need an existing config.
+  const tools = el(
+    'div',
+    { class: 'home-tools' },
+    el('button', { class: 'btn ghost', onClick: () => setView({ name: 'setup' }) }, 'Scan setup code'),
+    el('button', { class: 'btn ghost', onClick: () => setView({ name: 'quick' }) }, 'Quick scan (no validation)'),
+  );
+
   if (configs.length === 0) {
     container.append(
       el(
@@ -177,7 +209,9 @@ function renderList(): HTMLElement {
           { class: 'btn primary', onClick: () => setView({ name: 'form' }) },
           'Configure a scanner',
         ),
+        el('p', { class: 'muted' }, 'or set one up by scanning a QR:'),
       ),
+      tools,
     );
     return container;
   }
@@ -207,7 +241,7 @@ function renderList(): HTMLElement {
       ),
     );
   }
-  container.append(list);
+  container.append(list, tools);
   return container;
 }
 
@@ -351,6 +385,43 @@ function stopScanner(): void {
   busy = false;
 }
 
+/** Build the "camera unavailable" placeholder shown when the camera won't start. */
+function cameraErrorNode(err: unknown): HTMLElement {
+  const message = err instanceof Error ? err.message : String(err);
+  const denied = /denied|permission|NotAllowed/i.test(message);
+  return el(
+    'div',
+    { class: 'camera-error' },
+    el('p', {}, denied ? 'Camera access was blocked.' : 'Could not start the camera.'),
+    el('p', { class: 'muted' }, 'Grant camera permission (needs HTTPS).'),
+  );
+}
+
+/**
+ * Start the camera into `videoWrap`, wiring the live <video> or an error
+ * placeholder. Shared by the ticket-scan, setup-scan and quick-scan views.
+ */
+function startCameraInto(
+  videoWrap: HTMLElement,
+  opts: {
+    formats: CodeFormat[];
+    debounceMs: number;
+    onScan: (code: string, type: string) => void;
+    onError: (message: string) => void;
+  },
+): void {
+  stopScanner();
+  startScanner(opts)
+    .then((handle) => {
+      scanner = handle;
+      handle.video.className = 'scan-video';
+      videoWrap.replaceChildren(handle.video);
+    })
+    .catch((err: unknown) => {
+      videoWrap.replaceChildren(cameraErrorNode(err));
+    });
+}
+
 function renderScan(configId: string): HTMLElement {
   const config = configs.find((c) => c.id === configId);
   if (!config) {
@@ -455,32 +526,14 @@ function renderScan(configId: string): HTMLElement {
   }
 
   // -- Start camera ---------------------------------------------------------
-  stopScanner();
-  startScanner({
+  startCameraInto(videoWrap, {
     formats: config.formats,
     debounceMs: config.debounceMs,
     onScan: (code, type) => void handleScan(code, type),
     onError: (message) => {
       statusLine.textContent = message;
     },
-  })
-    .then((handle) => {
-      scanner = handle;
-      handle.video.className = 'scan-video';
-      videoWrap.replaceChildren(handle.video);
-    })
-    .catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      const denied = /denied|permission|NotAllowed/i.test(message);
-      videoWrap.replaceChildren(
-        el(
-          'div',
-          { class: 'camera-error' },
-          el('p', {}, denied ? 'Camera access was blocked.' : 'Could not start the camera.'),
-          el('p', { class: 'muted' }, 'Grant camera permission (needs HTTPS), or enter codes manually below.'),
-        ),
-      );
-    });
+  });
 
   return container;
 }
@@ -537,10 +590,206 @@ function openHistory(config: TicketConfig): void {
   document.body.append(host);
 }
 
+// -- Import confirmation (from a link or scanned setup QR) -------------------
+
+function renderImport(payload: ConfigPayload): HTMLElement {
+  const existing = configs.find((c) => c.apiUrl === payload.apiUrl);
+
+  const row = (label: string, value: string): HTMLElement =>
+    el('div', { class: 'result-field' }, el('span', { class: 'muted' }, label), el('span', {}, value));
+
+  const summary = el(
+    'div',
+    { class: 'result-fields' },
+    row('Name', payload.name),
+    row('Endpoint', payload.apiUrl),
+    row('Method', payload.method ?? 'POST'),
+    row('Formats', payload.formats.map((f) => CODE_FORMAT_LABELS[f]).join(', ')),
+    row('Continuous', payload.continuousMode ? 'On' : 'Off'),
+  );
+  if (payload.scannerName) summary.append(row('Scanner', payload.scannerName));
+  if (payload.apiKey) summary.append(row('API key', 'included in link'));
+
+  const addNew = (): void => {
+    configs = [...configs, { ...payload, id: uid() }];
+    persist();
+    setView({ name: 'list' });
+  };
+  const updateExisting = (): void => {
+    if (!existing) return addNew();
+    configs = configs.map((c) => (c.id === existing.id ? { ...payload, id: existing.id } : c));
+    persist();
+    setView({ name: 'list' });
+  };
+
+  const buttons = existing
+    ? [
+        el('button', { class: 'btn primary', onClick: updateExisting }, `Update "${existing.name}"`),
+        el('button', { class: 'btn ghost', onClick: addNew }, 'Add as new'),
+      ]
+    : [el('button', { class: 'btn primary', onClick: addNew }, 'Add scanner')];
+  buttons.push(el('button', { class: 'btn ghost', onClick: () => setView({ name: 'list' }) }, 'Cancel'));
+
+  return el(
+    'div',
+    { class: 'screen' },
+    el(
+      'header',
+      { class: 'topbar' },
+      el('button', { class: 'btn ghost', onClick: () => setView({ name: 'list' }) }, '← Back'),
+      el('h1', {}, 'Set up this scanner'),
+      el('span', {}),
+    ),
+    el('p', { class: 'muted' }, 'Review the configuration from this link before adding it.'),
+    ...(existing
+      ? [el('p', { class: 'import-warn' }, `A scanner for this endpoint already exists ("${existing.name}").`)]
+      : []),
+    el('div', { class: 'config-card import-card' }, summary),
+    el('div', { class: 'form-buttons import-buttons' }, ...buttons),
+  );
+}
+
+// -- Setup-code scan (scan a provisioning QR to add a config) ----------------
+
+function renderSetup(): HTMLElement {
+  const videoWrap = el('div', { class: 'video-wrap' });
+  const statusLine = el('div', { class: 'scan-status' }, 'Point at a setup QR code');
+  let handled = false;
+
+  const consume = (raw: string): void => {
+    if (handled) return;
+    const payload = parseConfigLink(raw);
+    if (payload) {
+      handled = true;
+      if (skipConfirmFromLink(raw)) {
+        upsertConfig(payload);
+        setView({ name: 'list' });
+      } else {
+        setView({ name: 'import', payload });
+      }
+    } else {
+      statusLine.textContent = 'That’s not a setup code — try again';
+      setTimeout(() => {
+        if (!handled) statusLine.textContent = 'Point at a setup QR code';
+      }, 1600);
+    }
+  };
+
+  const pasteLink = (): void => {
+    const raw = prompt('Paste a setup link:');
+    if (raw && raw.trim()) consume(raw.trim());
+  };
+
+  const container = el(
+    'div',
+    { class: 'scan-screen' },
+    el(
+      'header',
+      { class: 'topbar scan-topbar' },
+      el('button', { class: 'btn ghost', onClick: () => setView({ name: 'list' }) }, '← Back'),
+      el('h1', {}, 'Scan setup code'),
+      el('span', {}),
+    ),
+    videoWrap,
+    statusLine,
+    el('div', { class: 'scan-actions' }, el('button', { class: 'btn ghost', onClick: pasteLink }, 'Paste setup link')),
+  );
+
+  startCameraInto(videoWrap, {
+    formats: ['qr'],
+    debounceMs: 1500,
+    onScan: (code) => consume(code),
+    onError: (message) => {
+      statusLine.textContent = message;
+    },
+  });
+
+  return container;
+}
+
+// -- Quick scan (decode any code, no validation) -----------------------------
+
+function renderQuick(): HTMLElement {
+  const videoWrap = el('div', { class: 'video-wrap' });
+  const overlayHost = el('div', { class: 'overlay-host' });
+  const statusLine = el('div', { class: 'scan-status' }, 'Point at any barcode or QR');
+  let paused = false;
+
+  const show = (code: string, type: string): void => {
+    paused = true;
+    const copy: EventListener = (e) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      void navigator.clipboard?.writeText(code);
+      btn.textContent = 'Copied!';
+      setTimeout(() => (btn.textContent = 'Copy'), 1400);
+    };
+    const card = el(
+      'div',
+      { class: 'result-card', style: 'border-color:#334155' },
+      el('div', { class: 'result-banner', style: 'background:#334155' }, (type || 'code').toUpperCase()),
+      el(
+        'div',
+        { class: 'result-body' },
+        el('code', { class: 'result-code', style: 'font-size:15px' }, code),
+        el(
+          'div',
+          { class: 'result-fields' },
+          el('div', { class: 'result-field' }, el('span', { class: 'muted' }, 'Format'), el('span', {}, type || 'unknown')),
+        ),
+      ),
+      el(
+        'div',
+        { class: 'form-buttons', style: 'padding:0 16px 16px' },
+        el('button', { class: 'btn ghost', onClick: copy }, 'Copy'),
+        el(
+          'button',
+          {
+            class: 'btn primary',
+            onClick: () => {
+              overlayHost.replaceChildren();
+              paused = false;
+            },
+          },
+          'Scan again',
+        ),
+      ),
+    );
+    overlayHost.replaceChildren(el('div', { class: 'overlay-backdrop' }, card));
+  };
+
+  const container = el(
+    'div',
+    { class: 'scan-screen' },
+    el(
+      'header',
+      { class: 'topbar scan-topbar' },
+      el('button', { class: 'btn ghost', onClick: () => setView({ name: 'list' }) }, '← Back'),
+      el('h1', {}, 'Quick scan'),
+      el('span', {}),
+    ),
+    videoWrap,
+    statusLine,
+    overlayHost,
+  );
+
+  startCameraInto(videoWrap, {
+    formats: [...CODE_FORMATS],
+    debounceMs: 1500,
+    onScan: (code, type) => {
+      if (!paused) show(code, type);
+    },
+    onError: (message) => {
+      statusLine.textContent = message;
+    },
+  });
+
+  return container;
+}
+
 // -- Render ------------------------------------------------------------------
 
 function render(): void {
-  const banner = view.name === 'scan' ? null : renderBanner();
+  const banner = isCameraView(view) ? null : renderBanner();
   let screen: HTMLElement;
   switch (view.name) {
     case 'list':
@@ -552,29 +801,41 @@ function render(): void {
     case 'scan':
       screen = renderScan(view.configId);
       break;
+    case 'import':
+      screen = renderImport(view.payload);
+      break;
+    case 'setup':
+      screen = renderSetup();
+      break;
+    case 'quick':
+      screen = renderQuick();
+      break;
   }
   root.replaceChildren(...(banner ? [banner, screen] : [screen]));
 }
 
 // -- Boot --------------------------------------------------------------------
 
-function importDeeplinkConfig(): void {
-  if (!location.search) return;
+/**
+ * Decide the initial view. A provisioning link (`?endpoint=...`) opens the
+ * import-confirmation screen — the config is NOT added until the user confirms.
+ */
+function initialView(): View {
+  if (!location.search) return { name: 'list' };
   const params = Object.fromEntries(new URLSearchParams(location.search).entries());
   const payload = payloadFromParams(params);
-  if (!payload) return;
-
-  // De-dupe: same endpoint + name already configured -> skip.
-  const dupe = configs.find((c) => c.apiUrl === payload.apiUrl && c.name === payload.name);
-  if (!dupe) {
-    configs = [...configs, { ...payload, id: uid() }];
-    persist();
-  }
-  // Clean the URL so a refresh doesn't re-import (pendingSearch keeps the params
-  // for the banner's "Open in app" deeplink).
+  // Clean the URL so a refresh doesn't re-open the prompt (pendingSearch keeps
+  // the params for the banner's "Open in app" deeplink).
   history.replaceState(null, '', location.pathname);
+  if (!payload) return { name: 'list' };
+  // skipConfirm=true: add it straight away and go to the list.
+  if (skipConfirmFromParams(params)) {
+    upsertConfig(payload);
+    return { name: 'list' };
+  }
+  return { name: 'import', payload };
 }
 
 getDeviceId(); // ensure a stable device id exists from first load
-importDeeplinkConfig();
+view = initialView();
 render();

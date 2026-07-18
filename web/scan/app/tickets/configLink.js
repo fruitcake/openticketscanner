@@ -48,6 +48,8 @@ export function buildConfigLink(config, options) {
         params.push(['scanner', config.scannerName]);
     if (options.includeKey && config.apiKey)
         params.push(['key', config.apiKey]);
+    if (options.skipConfirm)
+        params.push(['skipConfirm', 'true']);
     const query = params
         .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
         .join('&');
@@ -142,4 +144,22 @@ export function parseConfigLink(input) {
     if (query == null)
         return null;
     return payloadFromParams(parseQuery(query));
+}
+/**
+ * Whether a provisioning payload asked to skip the import-confirmation screen
+ * and add the config immediately (`skipConfirm=true` or `1`). This is a
+ * directive, not configuration data, so it lives outside {@link ConfigPayload}
+ * and is read separately by whichever screen consumes the link.
+ */
+export function skipConfirmFromParams(params) {
+    const raw = params.skipConfirm;
+    const value = (Array.isArray(raw) ? raw[0] : raw)?.trim().toLowerCase();
+    return value === 'true' || value === '1';
+}
+/** Same as {@link skipConfirmFromParams}, but from a raw link / scheme / bare query. */
+export function skipConfirmFromLink(input) {
+    const query = extractQuery(input);
+    if (query == null)
+        return false;
+    return skipConfirmFromParams(parseQuery(query));
 }

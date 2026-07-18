@@ -43,7 +43,17 @@
       .btn.ghost { background: transparent; border-color: var(--border); color: var(--text); }
       .btn.danger { background: transparent; border-color: var(--danger); color: #f87171; }
 
-      .empty { text-align: center; padding: 48px 16px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+      .empty { text-align: center; padding: 48px 16px 16px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+
+      .home-tools { display: flex; gap: 10px; flex-wrap: wrap; }
+      .home-tools .btn { flex: 1; min-width: 140px; text-align: center; }
+
+      .import-warn { color: #d9a300; font-size: 14px; margin: 0; }
+      .import-card { display: block; padding: 16px; }
+      .import-card .result-field { padding: 6px 0; border-bottom: 1px solid var(--border); }
+      .import-card .result-field:last-child { border-bottom: 0; }
+      .import-card .result-field span:last-child { text-align: right; word-break: break-all; }
+      .import-buttons { flex-wrap: wrap; }
 
       .card-list { display: flex; flex-direction: column; gap: 10px; }
       .config-card {
