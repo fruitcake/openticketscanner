@@ -167,9 +167,10 @@
       var query = buildQuery();
       var httpsLink = 'https://' + HOST + '/' + PATH + '?' + query;
       var schemeLink = SCHEME + '://' + PATH + '?' + query;
-      // The static web scanner reads the same provisioning payload from its URL and
-      // configures itself directly — so this link opens a ready-to-use demo scanner.
-      var webLink = 'https://' + HOST + '/scan/?' + query;
+      // The static web scanner reads the same provisioning payload from its URL.
+      // skipConfirm=true adds the demo config without a confirmation screen, so this
+      // link opens a ready-to-use demo scanner straight away.
+      var webLink = 'https://' + HOST + '/scan/?' + query + '&skipConfirm=true';
 
       function renderQR(elId, text) {
         try {
