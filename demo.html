@@ -57,9 +57,23 @@
       <h1>Try the demo</h1>
       <p class="updated">See the app work end to end — no server or account needed.</p>
 
+      <div class="tldr" style="border-color:#34d399">
+        <strong>No app needed — try it right in your browser.</strong>
+        This opens a scanner that's <em>already configured</em> for the demo (it loads the
+        configuration straight from the link — no setup screen, no QR to scan first). Allow
+        the camera, then point it at the sample ticket QR further down.
+        <div class="actions" style="margin-top:12px">
+          <a class="btn" id="webdemo" href="https://app.openticketscanner.com/scan/">Open the demo scanner →</a>
+        </div>
+        <span class="qrcap" style="width:auto;text-align:left;display:block;margin-top:10px">
+          Camera scanning needs HTTPS (this site qualifies). The native app adds sounds,
+          on-device history and faster scanning.
+        </span>
+      </div>
+
       <div class="tldr">
-        <strong>Two steps:</strong> ① In the app, tap <em>Scan setup code</em> and scan
-        the first QR to load the demo configuration. ② Start scanning and point at the
+        <strong>Prefer the app? Two steps:</strong> ① In the app, tap <em>Scan setup code</em>
+        and scan the first QR to load the demo configuration. ② Start scanning and point at the
         sample ticket QR below. The demo endpoint returns a “valid” result for
         <em>any</em> code, so you can also scan any other QR you like.
       </div>
@@ -153,6 +167,9 @@
       var query = buildQuery();
       var httpsLink = 'https://' + HOST + '/' + PATH + '?' + query;
       var schemeLink = SCHEME + '://' + PATH + '?' + query;
+      // The static web scanner reads the same provisioning payload from its URL and
+      // configures itself directly — so this link opens a ready-to-use demo scanner.
+      var webLink = 'https://' + HOST + '/scan/?' + query;
 
       function renderQR(elId, text) {
         try {
@@ -169,6 +186,7 @@
       renderQR('ticketqr', TICKET_CODE);
       document.getElementById('setuplink').textContent = httpsLink;
       document.getElementById('openapp').href = schemeLink;
+      document.getElementById('webdemo').href = webLink;
 
       document.getElementById('copy').addEventListener('click', function () {
         var btn = this;
