@@ -58,16 +58,16 @@
       <p class="updated">See the app work end to end — no server or account needed.</p>
 
       <div class="tldr" style="border-color:#34d399">
-        <strong>No app needed — try it right in your browser.</strong>
-        This opens a scanner that's <em>already configured</em> for the demo (it loads the
-        configuration straight from the link — no setup screen, no QR to scan first). Allow
-        the camera, then point it at the sample ticket QR further down.
+        <strong>Try the demo in one tap.</strong>
+        This link opens the demo <em>already configured</em> (no setup screen, no QR to scan
+        first) — in the app if you have it installed, otherwise in your browser. Allow the
+        camera, then point it at the sample ticket QR further down.
         <div class="actions" style="margin-top:12px">
-          <a class="btn" id="webdemo" href="https://app.openticketscanner.com/scan/">Open the demo scanner →</a>
+          <a class="btn" id="webdemo" href="https://app.openticketscanner.com/configure">Open the demo →</a>
         </div>
         <span class="qrcap" style="width:auto;text-align:left;display:block;margin-top:10px">
-          Camera scanning needs HTTPS (this site qualifies). The native app adds sounds,
-          on-device history and faster scanning.
+          It’s a universal link: it opens the app on a device that has it, or the browser
+          scanner otherwise. Camera scanning needs HTTPS.
         </span>
       </div>
 
@@ -149,7 +149,7 @@
       document.getElementById('yr').textContent = new Date().getFullYear();
 
       // ---- demo configuration — mirrors the payload format in src/tickets/configLink.ts ----
-      var HOST = 'app.openticketscanner.com', PATH = 'configure', SCHEME = 'openticketscanner';
+      var HOST = 'app.openticketscanner.com', PATH = 'configure';
       var DEMO = {
         v: '1', name: 'Demo',
         endpoint: 'https://openticketscanner.com/demo.json',
@@ -165,12 +165,12 @@
         ].map(function (p) { return p[0] + '=' + encodeURIComponent(p[1]); }).join('&');
       }
       var query = buildQuery();
+      // The universal link opens the app if installed, else the /configure fallback
+      // page (which forwards to the browser scanner). Both buttons below use it.
       var httpsLink = 'https://' + HOST + '/' + PATH + '?' + query;
-      var schemeLink = SCHEME + '://' + PATH + '?' + query;
-      // The static web scanner reads the same provisioning payload from its URL.
-      // skipConfirm=true adds the demo config without a confirmation screen, so this
-      // link opens a ready-to-use demo scanner straight away.
-      var webLink = 'https://' + HOST + '/scan/?' + query + '&skipConfirm=true';
+      // Same universal link, plus skipConfirm=true so the demo config is added without
+      // a confirmation screen (honoured by both the app and the web scanner).
+      var webLink = httpsLink + '&skipConfirm=true';
 
       function renderQR(elId, text) {
         try {
@@ -186,7 +186,7 @@
       renderQR('setupqr', httpsLink);
       renderQR('ticketqr', TICKET_CODE);
       document.getElementById('setuplink').textContent = httpsLink;
-      document.getElementById('openapp').href = schemeLink;
+      document.getElementById('openapp').href = httpsLink;
       document.getElementById('webdemo').href = webLink;
 
       document.getElementById('copy').addEventListener('click', function () {
