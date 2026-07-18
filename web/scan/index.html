@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Open Ticket Scanner — Web</title>
+    <meta name="description" content="Scan and validate tickets from your browser. Configure an endpoint and scan with your camera." />
+    <link rel="icon" href="/assets/icon.png" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0f14;
+        --surface: #161b22;
+        --surface-alt: #1c232c;
+        --border: #2a323c;
+        --text: #e6edf3;
+        --muted: #9aa7b4;
+        --primary: #22c55e;
+        --primary-ink: #04120a;
+        --danger: #dc2626;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      #app { min-height: 100%; }
+
+      .screen { max-width: 560px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .topbar h1 { font-size: 18px; margin: 0; flex: 1; text-align: center; }
+      .muted { color: var(--muted); font-size: 13px; }
+
+      .btn {
+        appearance: none; border: 1px solid transparent; border-radius: 10px;
+        padding: 10px 16px; font-size: 15px; font-weight: 700; cursor: pointer;
+        background: var(--surface-alt); color: var(--text); text-decoration: none; display: inline-block;
+      }
+      .btn.primary { background: var(--primary); color: var(--primary-ink); }
+      .btn.ghost { background: transparent; border-color: var(--border); color: var(--text); }
+      .btn.danger { background: transparent; border-color: var(--danger); color: #f87171; }
+
+      .empty { text-align: center; padding: 48px 16px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+
+      .card-list { display: flex; flex-direction: column; gap: 10px; }
+      .config-card {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+        padding: 14px; display: flex; align-items: center; gap: 12px;
+      }
+      .config-main { flex: 1; display: flex; flex-direction: column; gap: 3px; cursor: pointer; min-width: 0; }
+      .config-main strong { font-size: 16px; }
+      .config-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .config-actions { display: flex; gap: 8px; }
+
+      .form-row { display: flex; flex-direction: column; gap: 6px; }
+      .form-row.inline { flex-direction: row; align-items: center; gap: 10px; }
+      .form-label { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+      .form-hint { font-size: 12px; color: var(--muted); }
+      .field {
+        width: 100%; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px;
+        color: var(--text); font-size: 16px; padding: 12px 14px;
+      }
+      .format-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+      .format-item { display: flex; align-items: center; gap: 8px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+      .form-error { color: #f87171; font-size: 14px; min-height: 18px; margin: 0; }
+      .form-buttons { display: flex; gap: 10px; }
+      .form-buttons .btn { flex: 1; }
+
+      /* Scanner */
+      .scan-screen { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+      .scan-topbar { padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+      .video-wrap { flex: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+      .scan-video { width: 100%; height: 100%; object-fit: cover; }
+      .camera-error { padding: 24px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
+      .scan-status { text-align: center; padding: 10px; color: var(--muted); font-size: 14px; background: var(--surface); }
+      .scan-actions { display: flex; justify-content: center; padding: 10px; background: var(--surface); border-top: 1px solid var(--border); }
+
+      /* Overlays (result + history) */
+      .overlay-host:empty { display: none; }
+      .overlay-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,.78);
+        display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+      }
+      .result-card, .history-card {
+        width: 100%; max-width: 420px; max-height: 85vh; background: #11161c;
+        border-radius: 18px; border: 2px solid var(--border); overflow: hidden; display: flex; flex-direction: column;
+      }
+      .result-banner { padding: 18px; text-align: center; font-size: 26px; font-weight: 800; letter-spacing: 2px; color: #fff; }
+      .result-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow: auto; }
+      .result-message { font-size: 18px; font-weight: 600; text-align: center; margin: 0; }
+      .result-fields { display: flex; flex-direction: column; gap: 8px; }
+      .result-field { display: flex; justify-content: space-between; gap: 12px; }
+      .result-field span:first-child { text-transform: capitalize; }
+      .result-field span:last-child { font-weight: 600; text-align: right; }
+      .result-prev { background: rgba(217,163,0,.12); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+      .prev-label { color: #d9a300; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+      .result-code { color: #5b6772; font-size: 12px; font-family: monospace; text-align: center; word-break: break-all; }
+      .result-continue { border-radius: 0; padding: 16px; color: #fff; font-size: 17px; }
+
+      .history-card { max-height: 80vh; }
+      .history-card .topbar { padding: 16px; }
+      .history-list { flex: 1; overflow: auto; padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+      .history-row { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+      .history-code { font-family: monospace; font-size: 13px; word-break: break-all; }
+      .history-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 4px; }
+      .history-card .btn.danger { margin: 16px; }
+
+      /* Store banner */
+      .banner {
+        display: flex; align-items: center; gap: 12px; position: relative;
+        background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px;
+      }
+      .banner-icon { width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0; }
+      .banner-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+      .banner-text strong { font-size: 14px; }
+      .banner-text span { font-size: 12px; color: var(--muted); }
+      .banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+      .banner-btn { font-size: 13px; font-weight: 700; padding: 8px 12px; border-radius: 8px; text-decoration: none; background: var(--surface-alt); color: var(--text); border: 1px solid var(--border); }
+      .banner-btn.primary { background: var(--primary); color: var(--primary-ink); border-color: transparent; }
+      .banner-close { position: absolute; top: 4px; right: 6px; background: none; border: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+      @media (max-width: 460px) {
+        .banner { flex-wrap: wrap; padding-right: 28px; }
+        .banner-text span { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- Cross-browser barcode scanner (zxing-wasm). Exposes window.BarcodeDetectionAPI. -->
+    <script src="./vendor/barcode-detector.js"></script>
+    <script type="module" src="./app/web/main.js"></script>
+    <noscript>This scanner needs JavaScript enabled.</noscript>
+  </body>
+</html>

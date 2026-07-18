@@ -50,15 +50,19 @@
         the app and tap the button below.
       </p>
       <a class="button" id="open" href="#">Open in Open Ticket Scanner</a>
+      <p><a id="browser" href="#">…or use it in your browser →</a></p>
       <div class="stores">
         <a href="https://apps.apple.com/app/id6784664554">App Store</a>
         <a href="https://play.google.com/store/apps/details?id=nl.fruitcake.openticketscanner">Google Play</a>
       </div>
     </div>
     <script>
-      // Fall back to the custom scheme, preserving the query params.
-      var open = document.getElementById('open');
-      open.href = 'openticketscanner://configure' + window.location.search;
+      // Fall back to the custom scheme, preserving the query params, so an
+      // installed app claims the link. Also offer the static web scanner, which
+      // imports the same ?endpoint=... payload — no install required.
+      var search = window.location.search;
+      document.getElementById('open').href = 'openticketscanner://configure' + search;
+      document.getElementById('browser').href = '/scan/' + search;
     </script>
   </body>
 </html>

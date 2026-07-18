@@ -1,0 +1,25 @@
+{
+  "//": "Static web build. Compiles the browser scanner (src/web) plus the SHARED,",
+  "//2": "RN-free adapter modules to ESM under web/scan/app/, so parseTicketResponse",
+  "//3": "stays the single source of truth for the server's JSON shape (see AGENTS.md).",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "outDir": "web/scan/app",
+    "sourceMap": false,
+    "declaration": false,
+    "types": []
+  },
+  "include": [
+    "src/web/**/*.ts",
+    "src/tickets/parseTicketResponse.ts",
+    "src/tickets/configLink.ts",
+    "src/tickets/types.ts",
+    "src/utils/format.ts"
+  ]
+}
