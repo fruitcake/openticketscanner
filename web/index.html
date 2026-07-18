@@ -39,6 +39,10 @@
       }
       a.ios { background: #22c55e; color: #04120a; }
       a.android { background: #161b22; color: #e6edf3; border: 1px solid #2a323c; }
+      .divider { display: flex; align-items: center; gap: 12px; color: #5b6772; font-size: 13px; margin: 20px 0; }
+      .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #2a323c; }
+      a.web { background: transparent; color: #34d399; border: 1px solid #34d399; }
+      .note { margin: 10px 0 0; font-size: 12px; color: #5b6772; }
       .more { margin-top: 22px; font-size: 13px; }
       .more a { color: #34d399; text-decoration: none; }
     </style>
@@ -47,27 +51,26 @@
     <div class="card">
       <img class="icon" src="/assets/icon.png" alt="Open Ticket Scanner" />
       <h1>Open Ticket Scanner</h1>
-      <p id="msg">Get the app for your device.</p>
+      <p id="msg">Scan &amp; validate event tickets against your own API.</p>
       <div class="btns">
         <a class="btn ios" id="ios" href="https://apps.apple.com/app/id6784664554">Download on the App Store</a>
         <a class="btn android" id="android" href="https://play.google.com/store/apps/details?id=nl.fruitcake.openticketscanner">Get it on Google Play</a>
       </div>
+      <div class="divider">or</div>
+      <a class="btn web" href="/scan/">Open the web scanner →</a>
+      <p class="note">Runs right in your browser — no install. Camera scanning needs HTTPS.</p>
       <p class="more"><a href="https://openticketscanner.com/">About Open Ticket Scanner →</a></p>
     </div>
 
     <script>
-      // Send phones straight to their store; everyone else sees both options.
+      // Surface the store that matches the device first — but don't auto-redirect,
+      // so the "web scanner" option stays visible (it's most useful on phones).
       (function () {
         var ua = navigator.userAgent || '';
-        var ios = document.getElementById('ios').href;
-        var android = document.getElementById('android').href;
-        if (/iPhone|iPad|iPod/i.test(ua)) {
-          document.getElementById('msg').textContent = 'Opening the App Store…';
-          location.replace(ios);
-        } else if (/Android/i.test(ua)) {
-          document.getElementById('msg').textContent = 'Opening Google Play…';
-          location.replace(android);
-        }
+        var btns = document.querySelector('.btns');
+        var ios = document.getElementById('ios');
+        var android = document.getElementById('android');
+        if (/Android/i.test(ua)) btns.insertBefore(android, ios);
       })();
     </script>
   </body>

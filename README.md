@@ -270,7 +270,9 @@ src/
   ui/                      result popup, toast, history row, theme
   i18n/                    i18n-js setup + 7 locale catalogs (en, nl, fr, de, es, pt, it)
   utils/                   device id, app version, id, formatting
-web/                       universal-link hosting templates (AASA, assetlinks, fallback)
+web/                       static site: landing page, universal-link templates
+  scan/                    static browser scanner (built from src/web via build:web)
+src/web/                   browser scanner source (localStorage + barcode-detector)
 ```
 
 ## License
